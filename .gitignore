@@ -78,3 +78,5 @@
 /node_modules
 /libwebrtc
 /args.txt
+/out/**
+/out-x64-release/**
