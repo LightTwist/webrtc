@@ -956,25 +956,25 @@ void VideoReceiveStream2::HandleKeyFrameGeneration(
 // RTC_RUN_ON(packet_sequence_checker_)
 void VideoReceiveStream2::HandleFrameBufferTimeout(Timestamp now,
                                                    TimeDelta wait) {
-  absl::optional<int64_t> last_packet_ms =
-      rtp_video_stream_receiver_.LastReceivedPacketMs();
+  // absl::optional<int64_t> last_packet_ms =
+  //     rtp_video_stream_receiver_.LastReceivedPacketMs();
 
-  // To avoid spamming keyframe requests for a stream that is not active we
-  // check if we have received a packet within the last 5 seconds.
-  constexpr TimeDelta kInactiveDuraction = TimeDelta::Seconds(5);
-  const bool stream_is_active =
-      last_packet_ms &&
-      now - Timestamp::Millis(*last_packet_ms) < kInactiveDuraction;
-  if (!stream_is_active)
-    stats_proxy_.OnStreamInactive();
+  // // To avoid spamming keyframe requests for a stream that is not active we
+  // // check if we have received a packet within the last 5 seconds.
+  // constexpr TimeDelta kInactiveDuraction = TimeDelta::Seconds(5);
+  // const bool stream_is_active =
+  //     last_packet_ms &&
+  //     now - Timestamp::Millis(*last_packet_ms) < kInactiveDuraction;
+  // if (!stream_is_active)
+  //   stats_proxy_.OnStreamInactive();
 
-  if (stream_is_active && !IsReceivingKeyFrame(now) &&
-      (!config_.crypto_options.sframe.require_frame_encryption ||
-       rtp_video_stream_receiver_.IsDecryptable())) {
-    RTC_LOG(LS_WARNING) << "No decodable frame in " << wait
-                        << ", requesting keyframe.";
-    RequestKeyFrame(now);
-  }
+  // if (stream_is_active && !IsReceivingKeyFrame(now) &&
+  //     (!config_.crypto_options.sframe.require_frame_encryption ||
+  //      rtp_video_stream_receiver_.IsDecryptable())) {
+  //   RTC_LOG(LS_WARNING) << "No decodable frame in " << wait
+  //                       << ", requesting keyframe.";
+  //   RequestKeyFrame(now);
+  // }
 }
 
 // RTC_RUN_ON(packet_sequence_checker_)
