@@ -45,6 +45,12 @@ class TransformableVideoReceiverFrame
   uint32_t GetSsrc() const override { return ssrc_; }
   uint32_t GetTimestamp() const override { return frame_->Timestamp(); }
 
+  // LightTwist begin
+  uint16_t first_seq_num() const override { return frame_->first_seq_num(); }
+  uint16_t last_seq_num() const override { return frame_->last_seq_num(); }
+  int64_t GetNtpTimeMs() const override { return frame_->NtpTimeMs(); };
+  // LightTwist end
+
   bool IsKeyFrame() const override {
     return frame_->FrameType() == VideoFrameType::kVideoFrameKey;
   }

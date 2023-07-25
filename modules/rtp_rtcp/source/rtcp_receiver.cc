@@ -471,16 +471,20 @@ bool RTCPReceiver::ParseCompoundPacket(rtc::ArrayView<const uint8_t> packet,
 
     switch (rtcp_block.type()) {
       case rtcp::SenderReport::kPacketType:
-        HandleSenderReport(rtcp_block, packet_information);
+        fprintf(stderr, "rtcp::SenderReport\n");
+        (rtcp_block, packet_information);
         received_blocks[packet_information->remote_ssrc].sender_report = true;
         break;
       case rtcp::ReceiverReport::kPacketType:
+        fprintf(stderr, "rtcp::ReceiverReport\n");
         HandleReceiverReport(rtcp_block, packet_information);
         break;
       case rtcp::Sdes::kPacketType:
+        fprintf(stderr, "rtcp::Sdes\n");
         HandleSdes(rtcp_block, packet_information);
         break;
       case rtcp::ExtendedReports::kPacketType: {
+        fprintf(stderr, "rtcp::ExtendedReports\n");
         bool contains_dlrr = false;
         uint32_t ssrc = 0;
         HandleXr(rtcp_block, packet_information, contains_dlrr, ssrc);
@@ -490,12 +494,15 @@ bool RTCPReceiver::ParseCompoundPacket(rtc::ArrayView<const uint8_t> packet,
         break;
       }
       case rtcp::Bye::kPacketType:
+        fprintf(stderr, "rtcp::Bye\n");
         HandleBye(rtcp_block);
         break;
       case rtcp::App::kPacketType:
+        fprintf(stderr, "rtcp::App\n");
         HandleApp(rtcp_block, packet_information);
         break;
       case rtcp::Rtpfb::kPacketType:
+        fprintf(stderr, "rtcp::Rtpfb\n");
         switch (rtcp_block.fmt()) {
           case rtcp::Nack::kFeedbackMessageType:
             HandleNack(rtcp_block, packet_information);
@@ -518,6 +525,7 @@ bool RTCPReceiver::ParseCompoundPacket(rtc::ArrayView<const uint8_t> packet,
         }
         break;
       case rtcp::Psfb::kPacketType:
+        fprintf(stderr, "rtcp::Psfb\n");
         switch (rtcp_block.fmt()) {
           case rtcp::Pli::kFeedbackMessageType:
             HandlePli(rtcp_block, packet_information);
@@ -570,11 +578,15 @@ bool RTCPReceiver::ParseCompoundPacket(rtc::ArrayView<const uint8_t> packet,
 
 void RTCPReceiver::HandleSenderReport(const CommonHeader& rtcp_block,
                                       PacketInformation* packet_information) {
+  fprintf(stderr, "Got a SenderReport!\n");
+
   rtcp::SenderReport sender_report;
   if (!sender_report.Parse(rtcp_block)) {
     ++num_skipped_packets_;
     return;
   }
+
+  
 
   const uint32_t remote_ssrc = sender_report.sender_ssrc();
 
@@ -1140,6 +1152,8 @@ void RTCPReceiver::NotifyTmmbrUpdated() {
 // Holding no Critical section.
 void RTCPReceiver::TriggerCallbacksFromRtcpPacket(
     const PacketInformation& packet_information) {
+      
+  fprintf(stderr, "RTCPReceiver::TriggerCallbacksFromRtcpPacket\n");
   // Process TMMBR and REMB first to avoid multiple callbacks
   // to OnNetworkChanged.
   if (packet_information.packet_type_flags & kRtcpTmmbr) {

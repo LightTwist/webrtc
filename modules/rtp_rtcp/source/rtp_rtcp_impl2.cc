@@ -714,6 +714,7 @@ void ModuleRtpRtcpImpl2::OnReceivedNack(
 
 void ModuleRtpRtcpImpl2::OnReceivedRtcpReportBlocks(
     const ReportBlockList& report_blocks) {
+      fprintf(stderr, "ModuleRtpRtcpImpl2::OnReceivedRtcpReportBlocks\n");
   if (rtp_sender_) {
     uint32_t ssrc = SSRC();
     absl::optional<uint32_t> rtx_ssrc;

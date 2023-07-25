@@ -37,6 +37,13 @@ class TransformableFrameInterface {
   virtual uint32_t GetSsrc() const = 0;
   virtual uint32_t GetTimestamp() const = 0;
 
+
+  // LightTwist begin
+  virtual uint16_t first_seq_num() const { return 0; };
+  virtual uint16_t last_seq_num() const { return 0; };
+  virtual int64_t GetNtpTimeMs() const { return 0; };
+  // LightTwist end
+
   enum class Direction {
     kUnknown,
     kReceiver,

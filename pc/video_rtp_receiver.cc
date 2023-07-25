@@ -104,8 +104,17 @@ VideoRtpReceiver::GetFrameDecryptor() const {
   return frame_decryptor_;
 }
 
+void VideoRtpReceiver::LTRequestKeyFrame() {
+  fprintf(stderr, "VideoRtpReceiver::LTRequestKeyFrame\n");
+  // TODO: expose the RequestKeyFrame method until it's reacheable
+  // if (media_channel_) {
+  //   media_channel_->RequestKeyFrame();
+  // }
+}
+
 void VideoRtpReceiver::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) {
+  fprintf(stderr, "VideoRtpReceiver::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(worker_thread_);
   frame_transformer_ = std::move(frame_transformer);
   if (media_channel_) {

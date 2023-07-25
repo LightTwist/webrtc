@@ -138,6 +138,7 @@ RtpVideoStreamReceiver2::RtcpFeedbackBuffer::RtcpFeedbackBuffer(
 }
 
 void RtpVideoStreamReceiver2::RtcpFeedbackBuffer::RequestKeyFrame() {
+  fprintf(stderr, "RtpVideoStreamReceiver2::RtcpFeedbackBuffer::::RequestKeyFrame\n");
   RTC_DCHECK_RUN_ON(&packet_sequence_checker_);
   request_key_frame_ = true;
 }
@@ -669,7 +670,12 @@ void RtpVideoStreamReceiver2::OnRtpPacket(const RtpPacketReceived& packet) {
   }
 }
 
+// void RtpVideoStreamReceiver2::LTRequestKeyFrame() {
+//   fprintf(stderr, "RtpVideoStreamReceiver2::LTRequestKeyFrame\n");
+// }
+
 void RtpVideoStreamReceiver2::RequestKeyFrame() {
+  fprintf(stderr, "RtpVideoStreamReceiver2::RequestKeyFrame\n");
   RTC_DCHECK_RUN_ON(&worker_task_checker_);
   // TODO(bugs.webrtc.org/10336): Allow the sender to ignore key frame requests
   // issued by anything other than the LossNotificationController if it (the
@@ -758,6 +764,13 @@ void RtpVideoStreamReceiver2::OnInsertedPacket(
       }
 
       const video_coding::PacketBuffer::Packet& last_packet = *packet;
+
+      fprintf(stderr, "RtpVideoStreamReceiver2::OnInsertedPacket\n");
+      fprintf(stderr, "ntp_estimator_.Estimate %ld\n", ntp_estimator_.Estimate(first_packet->timestamp));
+
+      // fprintf(stderr, "first_packet->seq_num: %d\n", first_packet->seq_num);
+      // fprintf(stderr, "last_packet.seq_num: %d\n", last_packet.seq_num);
+
       OnAssembledFrame(std::make_unique<RtpFrameObject>(
           first_packet->seq_num,                             //
           last_packet.seq_num,                               //
@@ -793,10 +806,21 @@ void RtpVideoStreamReceiver2::OnInsertedPacket(
 // RTC_RUN_ON(packet_sequence_checker_)
 void RtpVideoStreamReceiver2::OnAssembledFrame(
     std::unique_ptr<RtpFrameObject> frame) {
+
   RTC_DCHECK(frame);
 
   const absl::optional<RTPVideoHeader::GenericDescriptorInfo>& descriptor =
       frame->GetRtpVideoHeader().generic;
+
+  // if (descriptor) {
+  //   // fprintf(stderr, "RtpVideoStreamReceiver2::OnAssembledFrame got a descriptor frame_id: %u\n", descriptor->frame_id);
+  // }
+  // else {
+  //   // fprintf(stderr, "RtpVideoStreamReceiver2::OnAssembledFrame no descriptor\n");
+  // }
+
+  fprintf(stderr, "RtpVideoStreamReceiver2::OnAssembledFrame\n");
+  fprintf(stderr, "first_seq_num: %d, last_seq_num: %d\n", frame->first_seq_num(), frame->last_seq_num());
 
   if (loss_notification_controller_ && descriptor) {
     loss_notification_controller_->OnAssembledFrame(
@@ -898,6 +922,7 @@ void RtpVideoStreamReceiver2::SetFrameDecryptor(
 
 void RtpVideoStreamReceiver2::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) {
+  fprintf(stderr, "RtpVideoStreamReceiver2::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(&worker_task_checker_);
   frame_transformer_delegate_ =
       rtc::make_ref_counted<RtpVideoStreamReceiverFrameTransformerDelegate>(

@@ -657,6 +657,7 @@ void VideoReceiveStream2::SetFrameDecryptor(
 
 void VideoReceiveStream2::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) {
+  fprintf(stderr, "VideoReceiveStream2::SetDepacketizerToDecoderFrameTransformer\n");
   rtp_video_stream_receiver_.SetDepacketizerToDecoderFrameTransformer(
       std::move(frame_transformer));
 }
@@ -670,6 +671,7 @@ void VideoReceiveStream2::SendNack(
 }
 
 void VideoReceiveStream2::RequestKeyFrame(Timestamp now) {
+  fprintf(stderr, "VideoReceiveStream2::RequestKeyFrame\n");
   // Running on worker_sequence_checker_.
   // Called from RtpVideoStreamReceiver (rtp_video_stream_receiver_ is
   // ultimately responsible).

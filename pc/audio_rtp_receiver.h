@@ -119,6 +119,8 @@ class AudioRtpReceiver : public ObserverInterface,
   void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override;
+  
+  void LTRequestKeyFrame() override;
 
  private:
   void RestartMediaChannel(absl::optional<uint32_t> ssrc)

@@ -293,6 +293,7 @@ class VoERtcpObserver : public RtcpBandwidthObserver {
   void OnReceivedRtcpReceiverReport(const ReportBlockList& report_blocks,
                                     int64_t rtt,
                                     int64_t now_ms) override {
+    fprintf(stderr, "OnReceivedRtcpReceiverReport\n");
     {
       MutexLock lock(&mutex_);
       if (bandwidth_observer_) {

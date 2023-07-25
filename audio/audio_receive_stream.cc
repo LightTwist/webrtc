@@ -226,6 +226,7 @@ bool AudioReceiveStreamImpl::IsRunning() const {
 
 void AudioReceiveStreamImpl::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer) {
+  fprintf(stderr, "AudioReceiveStreamImpl::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
   channel_receive_->SetDepacketizerToDecoderFrameTransformer(
       std::move(frame_transformer));

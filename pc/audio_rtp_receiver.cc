@@ -274,8 +274,16 @@ std::vector<RtpSource> AudioRtpReceiver::GetSources() const {
   return media_channel_->GetSources(*ssrc_);
 }
 
+void AudioRtpReceiver::LTRequestKeyFrame() {
+  fprintf(stderr, "AudioRtpReceiver::LTRequestKeyFrame\n");
+  // if (media_channel_) {
+  //   media_channel_->RequestKeyFrame();
+  // }
+}
+
 void AudioRtpReceiver::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer) {
+  fprintf(stderr, "AudioRtpReceiver::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(worker_thread_);
   if (media_channel_) {
     media_channel_->SetDepacketizerToDecoderFrameTransformer(ssrc_.value_or(0),

@@ -961,6 +961,7 @@ void RtpVideoStreamReceiver::SetFrameDecryptor(
 
 void RtpVideoStreamReceiver::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) {
+  fprintf(stderr, "RtpVideoStreamReceiver::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(&network_tc_);
   frame_transformer_delegate_ =
       rtc::make_ref_counted<RtpVideoStreamReceiverFrameTransformerDelegate>(

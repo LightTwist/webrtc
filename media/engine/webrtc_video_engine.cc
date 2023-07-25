@@ -3311,6 +3311,7 @@ void WebRtcVideoChannel::WebRtcVideoReceiveStream::
     SetDepacketizerToDecoderFrameTransformer(
         rtc::scoped_refptr<webrtc::FrameTransformerInterface>
             frame_transformer) {
+  fprintf(stderr, "WebRtcVideoChannel::WebRtcVideoReceiveStream::SetDepacketizerToDecoderFrameTransformer\n");
   config_.frame_transformer = frame_transformer;
   if (stream_)
     stream_->SetDepacketizerToDecoderFrameTransformer(frame_transformer);
@@ -3555,6 +3556,7 @@ void WebRtcVideoChannel::SetEncoderToPacketizerFrameTransformer(
 void WebRtcVideoChannel::SetDepacketizerToDecoderFrameTransformer(
     uint32_t ssrc,
     rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer) {
+  fprintf(stderr, "WebRtcVideoChannel::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK(frame_transformer);
   RTC_DCHECK_RUN_ON(&thread_checker_);
   if (ssrc == 0) {

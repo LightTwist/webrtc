@@ -139,6 +139,9 @@ class RtpVideoStreamReceiver2 : public LossNotificationSender,
   // Send an RTCP keyframe request.
   void RequestKeyFrame() override;
 
+  // LightTwist
+//   void LTRequestKeyFrame() override;
+
   // Implements LossNotificationSender.
   void SendLossNotification(uint16_t last_decoded_seq_num,
                             uint16_t last_received_seq_num,

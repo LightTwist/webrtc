@@ -90,6 +90,8 @@ class VideoRtpReceiver : public RtpReceiverInternal,
   void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) override;
 
+  void LTRequestKeyFrame() override;
+
   // RtpReceiverInternal implementation.
   void Stop() override;
   void SetupMediaChannel(uint32_t ssrc) override;
