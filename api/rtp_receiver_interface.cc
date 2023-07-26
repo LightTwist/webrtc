@@ -42,9 +42,4 @@ void RtpReceiverInterface::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) {
       fprintf(stderr, "RtpReceiverInterface::SetDepacketizerToDecoderFrameTransformer\n");
     }
-
-//  void RtpReceiverInterface::LTRequestKeyFrame() {
-//   fprintf(stderr, "RtpReceiverInterface::LTRequestKeyFrame\n");
-//  }
-
 }  // namespace webrtc

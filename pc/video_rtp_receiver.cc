@@ -106,10 +106,7 @@ VideoRtpReceiver::GetFrameDecryptor() const {
 
 void VideoRtpReceiver::LTRequestKeyFrame() {
   fprintf(stderr, "VideoRtpReceiver::LTRequestKeyFrame\n");
-  // TODO: expose the RequestKeyFrame method until it's reacheable
-  // if (media_channel_) {
-  //   media_channel_->RequestKeyFrame();
-  // }
+  OnGenerateKeyFrame();
 }
 
 void VideoRtpReceiver::SetDepacketizerToDecoderFrameTransformer(
