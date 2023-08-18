@@ -45,7 +45,6 @@ extern const char kCodecParamAssociatedCodecName[];
 extern const char kCodecParamNotInNameValueFormat[];
 
 extern const char kOpusCodecName[];
-extern const char kIsacCodecName[];
 extern const char kL16CodecName[];
 extern const char kG722CodecName[];
 extern const char kIlbcCodecName[];
@@ -133,6 +132,8 @@ extern const char kH264FmtpSpropParameterSets[];
 extern const char kH264FmtpSpsPpsIdrInKeyframe[];
 extern const char kH264ProfileLevelConstrainedBaseline[];
 extern const char kH264ProfileLevelConstrainedHigh[];
+
+extern const char kVP9ProfileId[];
 
 extern const int kDefaultVideoMaxFramerate;
 

@@ -31,7 +31,7 @@ class MockRtpRtcpInterface : public RtpRtcpInterface {
  public:
   MOCK_METHOD(void,
               IncomingRtcpPacket,
-              (const uint8_t* incoming_packet, size_t packet_length),
+              (rtc::ArrayView<const uint8_t> packet),
               (override));
   MOCK_METHOD(void, SetRemoteSSRC, (uint32_t ssrc), (override));
   MOCK_METHOD(void, SetLocalSsrc, (uint32_t ssrc), (override));
@@ -67,7 +67,6 @@ class MockRtpRtcpInterface : public RtpRtcpInterface {
   MOCK_METHOD(RtpState, GetRtxState, (), (const, override));
   MOCK_METHOD(uint32_t, SSRC, (), (const, override));
   MOCK_METHOD(void, SetMid, (absl::string_view mid), (override));
-  MOCK_METHOD(void, SetCsrcs, (const std::vector<uint32_t>& csrcs), (override));
   MOCK_METHOD(void, SetRtxSendStatus, (int modes), (override));
   MOCK_METHOD(int, RtxSendStatus, (), (const, override));
   MOCK_METHOD(absl::optional<uint32_t>, RtxSsrc, (), (const, override));
@@ -98,6 +97,10 @@ class MockRtpRtcpInterface : public RtpRtcpInterface {
               (),
               (override));
   MOCK_METHOD(void,
+              OnAbortedRetransmissions,
+              (rtc::ArrayView<const uint16_t>),
+              (override));
+  MOCK_METHOD(void,
               OnPacketsAcknowledged,
               (rtc::ArrayView<const uint16_t>),
               (override));
@@ -114,14 +117,6 @@ class MockRtpRtcpInterface : public RtpRtcpInterface {
   MOCK_METHOD(RtcpMode, RTCP, (), (const, override));
   MOCK_METHOD(void, SetRTCPStatus, (RtcpMode method), (override));
   MOCK_METHOD(int32_t, SetCNAME, (absl::string_view cname), (override));
-  MOCK_METHOD(int32_t,
-              RemoteNTP,
-              (uint32_t * received_ntp_secs,
-               uint32_t* received_ntp_frac,
-               uint32_t* rtcp_arrival_time_secs,
-               uint32_t* rtcp_arrival_time_frac,
-               uint32_t* rtcp_timestamp),
-              (const, override));
   MOCK_METHOD(int32_t,
               RTT,
               (uint32_t remote_ssrc,

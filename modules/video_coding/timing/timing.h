@@ -16,17 +16,16 @@
 #include "absl/types/optional.h"
 #include "api/field_trials_view.h"
 #include "api/units/time_delta.h"
+#include "api/video/video_frame.h"
 #include "api/video/video_timing.h"
-#include "modules/video_coding/timing/codec_timer.h"
+#include "modules/video_coding/timing/decode_time_percentile_filter.h"
+#include "modules/video_coding/timing/timestamp_extrapolator.h"
 #include "rtc_base/experiments/field_trial_parser.h"
 #include "rtc_base/synchronization/mutex.h"
 #include "rtc_base/thread_annotations.h"
-#include "rtc_base/time/timestamp_extrapolator.h"
+#include "system_wrappers/include/clock.h"
 
 namespace webrtc {
-
-class Clock;
-class TimestampExtrapolator;
 
 class VCMTiming {
  public:
@@ -70,7 +69,8 @@ class VCMTiming {
 
   // Used to report that a frame is passed to decoding. Updates the timestamp
   // filter which is used to map between timestamps and receiver system time.
-  void IncomingTimestamp(uint32_t rtp_timestamp, Timestamp last_packet_time);
+  virtual void IncomingTimestamp(uint32_t rtp_timestamp,
+                                 Timestamp last_packet_time);
 
   // Returns the receiver system time when the frame with timestamp
   // `frame_timestamp` should be rendered, assuming that the system time
@@ -111,7 +111,8 @@ class VCMTiming {
 
   void SetMaxCompositionDelayInFrames(
       absl::optional<int> max_composition_delay_in_frames);
-  absl::optional<int> MaxCompositionDelayInFrames() const;
+
+  VideoFrame::RenderParameters RenderParameters() const;
 
   // Updates the last time a frame was scheduled for decoding.
   void SetLastDecodeScheduledTimestamp(Timestamp last_decode_scheduled);
@@ -121,14 +122,15 @@ class VCMTiming {
   Timestamp RenderTimeInternal(uint32_t frame_timestamp, Timestamp now) const
       RTC_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   TimeDelta TargetDelayInternal() const RTC_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  bool UseLowLatencyRendering() const RTC_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
  private:
   mutable Mutex mutex_;
   Clock* const clock_;
   const std::unique_ptr<TimestampExtrapolator> ts_extrapolator_
       RTC_PT_GUARDED_BY(mutex_);
-  std::unique_ptr<CodecTimer> codec_timer_ RTC_GUARDED_BY(mutex_)
-      RTC_PT_GUARDED_BY(mutex_);
+  std::unique_ptr<DecodeTimePercentileFilter> decode_time_filter_
+      RTC_GUARDED_BY(mutex_) RTC_PT_GUARDED_BY(mutex_);
   TimeDelta render_delay_ RTC_GUARDED_BY(mutex_);
   // Best-effort playout delay range for frames from capture to render.
   // The receiver tries to keep the delay between `min_playout_delay_ms_`

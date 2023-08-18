@@ -19,6 +19,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/string_view.h"
 #include "api/array_view.h"
+#include "api/task_queue/task_queue_factory.h"
 #include "api/transport/field_trial_based_config.h"
 #include "api/video_codecs/video_codec.h"
 #include "call/rtp_transport_controller_send_interface.h"
@@ -28,7 +29,6 @@
 #include "modules/rtp_rtcp/source/rtp_sender.h"
 #include "modules/video_coding/include/video_codec_interface.h"
 #include "rtc_base/checks.h"
-#include "rtc_base/location.h"
 #include "rtc_base/logging.h"
 #include "rtc_base/task_queue.h"
 #include "rtc_base/trace_event.h"
@@ -199,8 +199,10 @@ std::vector<RtpStreamSender> CreateRtpStreamSenders(
     FrameEncryptorInterface* frame_encryptor,
     const CryptoOptions& crypto_options,
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer,
-    const FieldTrialsView& trials) {
+    const FieldTrialsView& trials,
+    TaskQueueFactory* task_queue_factory) {
   RTC_DCHECK_GT(rtp_config.ssrcs.size(), 0);
+  RTC_DCHECK(task_queue_factory);
 
   RtpRtcpInterface::Configuration configuration;
   configuration.clock = clock;
@@ -274,8 +276,10 @@ std::vector<RtpStreamSender> CreateRtpStreamSenders(
     video_config.frame_encryptor = frame_encryptor;
     video_config.require_frame_encryption =
         crypto_options.sframe.require_frame_encryption;
-    video_config.enable_retransmit_all_layers = false;
     video_config.field_trials = &trials;
+    video_config.enable_retransmit_all_layers =
+        video_config.field_trials->IsEnabled(
+            "WebRTC-Video-EnableRetransmitAllLayers");
 
     const bool using_flexfec =
         fec_generator &&
@@ -291,7 +295,7 @@ std::vector<RtpStreamSender> CreateRtpStreamSenders(
       video_config.fec_overhead_bytes = fec_generator->MaxPacketOverhead();
     }
     video_config.frame_transformer = frame_transformer;
-    video_config.send_transport_queue = transport->GetWorkerQueue()->Get();
+    video_config.task_queue_factory = task_queue_factory;
     auto sender_video = std::make_unique<RTPSenderVideo>(video_config);
     rtp_streams.emplace_back(std::move(rtp_rtcp), std::move(sender_video),
                              std::move(fec_generator));
@@ -369,11 +373,9 @@ RtpVideoSender::RtpVideoSender(
     FrameEncryptorInterface* frame_encryptor,
     const CryptoOptions& crypto_options,
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer,
-    const FieldTrialsView& field_trials)
+    const FieldTrialsView& field_trials,
+    TaskQueueFactory* task_queue_factory)
     : field_trials_(field_trials),
-      send_side_bwe_with_overhead_(!absl::StartsWith(
-          field_trials_.Lookup("WebRTC-SendSideBwe-WithOverhead"),
-          "Disabled")),
       use_frame_rate_for_overhead_(absl::StartsWith(
           field_trials_.Lookup("WebRTC-Video-UseFrameRateForOverhead"),
           "Enabled")),
@@ -394,7 +396,8 @@ RtpVideoSender::RtpVideoSender(
                                           frame_encryptor,
                                           crypto_options,
                                           std::move(frame_transformer),
-                                          field_trials_)),
+                                          field_trials_,
+                                          task_queue_factory)),
       rtp_config_(rtp_config),
       codec_type_(GetVideoCodecType(rtp_config)),
       transport_(transport),
@@ -404,7 +407,7 @@ RtpVideoSender::RtpVideoSender(
       frame_count_observer_(observers.frame_count_observer) {
   transport_checker_.Detach();
   RTC_DCHECK_EQ(rtp_config_.ssrcs.size(), rtp_streams_.size());
-  if (send_side_bwe_with_overhead_ && has_packet_feedback_)
+  if (has_packet_feedback_)
     transport_->IncludeOverheadInPacedSender();
   // SSRCs are assumed to be sorted in the same order as `rtp_modules`.
   for (uint32_t ssrc : rtp_config_.ssrcs) {
@@ -475,33 +478,24 @@ RtpVideoSender::~RtpVideoSender() {
   RTC_DCHECK(!registered_for_feedback_);
 }
 
-void RtpVideoSender::SetActive(bool active) {
+void RtpVideoSender::Stop() {
   RTC_DCHECK_RUN_ON(&transport_checker_);
   MutexLock lock(&mutex_);
-  if (active_ == active)
+  if (!active_)
     return;
 
-  const std::vector<bool> active_modules(rtp_streams_.size(), active);
+  const std::vector<bool> active_modules(rtp_streams_.size(), false);
   SetActiveModulesLocked(active_modules);
-
-  auto* feedback_provider = transport_->GetStreamFeedbackProvider();
-  if (active && !registered_for_feedback_) {
-    feedback_provider->RegisterStreamFeedbackObserver(rtp_config_.ssrcs, this);
-    registered_for_feedback_ = true;
-  } else if (!active && registered_for_feedback_) {
-    feedback_provider->DeRegisterStreamFeedbackObserver(this);
-    registered_for_feedback_ = false;
-  }
 }
 
-void RtpVideoSender::SetActiveModules(const std::vector<bool> active_modules) {
+void RtpVideoSender::SetActiveModules(const std::vector<bool>& active_modules) {
   RTC_DCHECK_RUN_ON(&transport_checker_);
   MutexLock lock(&mutex_);
   return SetActiveModulesLocked(active_modules);
 }
 
 void RtpVideoSender::SetActiveModulesLocked(
-    const std::vector<bool> active_modules) {
+    const std::vector<bool>& active_modules) {
   RTC_DCHECK_RUN_ON(&transport_checker_);
   RTC_DCHECK_EQ(rtp_streams_.size(), active_modules.size());
   active_ = false;
@@ -511,7 +505,7 @@ void RtpVideoSender::SetActiveModulesLocked(
     }
 
     RtpRtcpInterface& rtp_module = *rtp_streams_[i].rtp_rtcp;
-    const bool was_active = rtp_module.SendingMedia();
+    const bool was_active = rtp_module.Sending();
     const bool should_be_active = active_modules[i];
 
     // Sends a kRtcpByeCode when going from true to false.
@@ -522,6 +516,17 @@ void RtpVideoSender::SetActiveModulesLocked(
       // prevent any stray packets in the pacer from asynchronously arriving
       // to a disabled module.
       transport_->packet_router()->RemoveSendRtpModule(&rtp_module);
+
+      // Clear the pacer queue of any packets pertaining to this module.
+      transport_->packet_sender()->RemovePacketsForSsrc(rtp_module.SSRC());
+      if (rtp_module.RtxSsrc().has_value()) {
+        transport_->packet_sender()->RemovePacketsForSsrc(
+            *rtp_module.RtxSsrc());
+      }
+      if (rtp_module.FlexfecSsrc().has_value()) {
+        transport_->packet_sender()->RemovePacketsForSsrc(
+            *rtp_module.FlexfecSsrc());
+      }
     }
 
     // If set to false this module won't send media.
@@ -532,6 +537,17 @@ void RtpVideoSender::SetActiveModulesLocked(
       transport_->packet_router()->AddSendRtpModule(&rtp_module,
                                                     /*remb_candidate=*/true);
     }
+  }
+  if (!active_) {
+    auto* feedback_provider = transport_->GetStreamFeedbackProvider();
+    if (registered_for_feedback_) {
+      feedback_provider->DeRegisterStreamFeedbackObserver(this);
+      registered_for_feedback_ = false;
+    }
+  } else if (!registered_for_feedback_) {
+    auto* feedback_provider = transport_->GetStreamFeedbackProvider();
+    feedback_provider->RegisterStreamFeedbackObserver(rtp_config_.ssrcs, this);
+    registered_for_feedback_ = true;
   }
 }
 
@@ -556,25 +572,18 @@ EncodedImageCallback::Result RtpVideoSender::OnEncodedImage(
     return Result(Result::ERROR_SEND_FAILED);
 
   shared_frame_id_++;
-  size_t stream_index = 0;
-  if (codec_specific_info &&
-      (codec_specific_info->codecType == kVideoCodecVP8 ||
-       codec_specific_info->codecType == kVideoCodecH264 ||
-       codec_specific_info->codecType == kVideoCodecGeneric)) {
-    // Map spatial index to simulcast.
-    stream_index = encoded_image.SpatialIndex().value_or(0);
-  }
-  RTC_DCHECK_LT(stream_index, rtp_streams_.size());
+  size_t simulcast_index = encoded_image.SimulcastIndex().value_or(0);
+  RTC_DCHECK_LT(simulcast_index, rtp_streams_.size());
 
   uint32_t rtp_timestamp =
       encoded_image.Timestamp() +
-      rtp_streams_[stream_index].rtp_rtcp->StartTimestamp();
+      rtp_streams_[simulcast_index].rtp_rtcp->StartTimestamp();
 
   // RTCPSender has it's own copy of the timestamp offset, added in
   // RTCPSender::BuildSR, hence we must not add the in the offset for this call.
   // TODO(nisse): Delete RTCPSender:timestamp_offset_, and see if we can confine
   // knowledge of the offset to a single place.
-  if (!rtp_streams_[stream_index].rtp_rtcp->OnSendingRtpFrame(
+  if (!rtp_streams_[simulcast_index].rtp_rtcp->OnSendingRtpFrame(
           encoded_image.Timestamp(), encoded_image.capture_time_ms_,
           rtp_config_.payload_type,
           encoded_image._frameType == VideoFrameType::kVideoFrameKey)) {
@@ -585,7 +594,7 @@ EncodedImageCallback::Result RtpVideoSender::OnEncodedImage(
   absl::optional<int64_t> expected_retransmission_time_ms;
   if (encoded_image.RetransmissionAllowed()) {
     expected_retransmission_time_ms =
-        rtp_streams_[stream_index].rtp_rtcp->ExpectedRetransmissionTimeMs();
+        rtp_streams_[simulcast_index].rtp_rtcp->ExpectedRetransmissionTimeMs();
   }
 
   if (IsFirstFrameOfACodedVideoSequence(encoded_image, codec_specific_info)) {
@@ -597,11 +606,11 @@ EncodedImageCallback::Result RtpVideoSender::OnEncodedImage(
     //    minimal set of templates.
     //  - Otherwise, don't pass along any templates at all which will disable
     //    the generation of a dependency descriptor.
-    RTPSenderVideo& sender_video = *rtp_streams_[stream_index].sender_video;
+    RTPSenderVideo& sender_video = *rtp_streams_[simulcast_index].sender_video;
     if (codec_specific_info && codec_specific_info->template_structure) {
       sender_video.SetVideoStructure(&*codec_specific_info->template_structure);
     } else if (absl::optional<FrameDependencyStructure> structure =
-                   params_[stream_index].GenericStructure(
+                   params_[simulcast_index].GenericStructure(
                        codec_specific_info)) {
       sender_video.SetVideoStructure(&*structure);
     } else {
@@ -609,13 +618,14 @@ EncodedImageCallback::Result RtpVideoSender::OnEncodedImage(
     }
   }
 
-  bool send_result = rtp_streams_[stream_index].sender_video->SendEncodedImage(
-      rtp_config_.payload_type, codec_type_, rtp_timestamp, encoded_image,
-      params_[stream_index].GetRtpVideoHeader(
-          encoded_image, codec_specific_info, shared_frame_id_),
-      expected_retransmission_time_ms);
+  bool send_result =
+      rtp_streams_[simulcast_index].sender_video->SendEncodedImage(
+          rtp_config_.payload_type, codec_type_, rtp_timestamp, encoded_image,
+          params_[simulcast_index].GetRtpVideoHeader(
+              encoded_image, codec_specific_info, shared_frame_id_),
+          expected_retransmission_time_ms);
   if (frame_count_observer_) {
-    FrameCounts& counts = frame_counts_[stream_index];
+    FrameCounts& counts = frame_counts_[simulcast_index];
     if (encoded_image._frameType == VideoFrameType::kVideoFrameKey) {
       ++counts.key_frames;
     } else if (encoded_image._frameType == VideoFrameType::kVideoFrameDelta) {
@@ -623,8 +633,8 @@ EncodedImageCallback::Result RtpVideoSender::OnEncodedImage(
     } else {
       RTC_DCHECK(encoded_image._frameType == VideoFrameType::kEmptyFrame);
     }
-    frame_count_observer_->FrameCountUpdated(counts,
-                                             rtp_config_.ssrcs[stream_index]);
+    frame_count_observer_->FrameCountUpdated(
+        counts, rtp_config_.ssrcs[simulcast_index]);
   }
   if (!send_result)
     return Result(Result::ERROR_SEND_FAILED);
@@ -669,6 +679,14 @@ void RtpVideoSender::OnVideoLayersAllocationUpdated(
       stream_allocation.rtp_stream_index = i;
       rtp_streams_[i].sender_video->SetVideoLayersAllocation(
           std::move(stream_allocation));
+      // Only send video frames on the rtp module if the encoder is configured
+      // to send. This is to prevent stray frames to be sent after an encoder
+      // has been reconfigured.
+      rtp_streams_[i].rtp_rtcp->SetSendingMediaStatus(
+          absl::c_any_of(allocation.active_spatial_layers,
+                         [&i](const VideoLayersAllocation::SpatialLayer layer) {
+                           return layer.rtp_stream_index == static_cast<int>(i);
+                         }));
     }
   }
 }
@@ -692,7 +710,7 @@ uint32_t RtpVideoSender::GetPacketizationOverheadRate() const {
 void RtpVideoSender::DeliverRtcp(const uint8_t* packet, size_t length) {
   // Runs on a network thread.
   for (const RtpStreamSender& stream : rtp_streams_)
-    stream.rtp_rtcp->IncomingRtcpPacket(packet, length);
+    stream.rtp_rtcp->IncomingRtcpPacket(rtc::MakeArrayView(packet, length));
 }
 
 void RtpVideoSender::ConfigureSsrcs(
@@ -822,7 +840,7 @@ void RtpVideoSender::OnBitrateUpdated(BitrateAllocationUpdate update,
   DataSize max_total_packet_size = DataSize::Bytes(
       rtp_config_.max_packet_size + transport_overhead_bytes_per_packet_);
   uint32_t payload_bitrate_bps = update.target_bitrate.bps();
-  if (send_side_bwe_with_overhead_ && has_packet_feedback_) {
+  if (has_packet_feedback_) {
     DataRate overhead_rate =
         CalculateOverheadRate(update.target_bitrate, max_total_packet_size,
                               packet_overhead, Frequency::Hertz(framerate));
@@ -856,7 +874,7 @@ void RtpVideoSender::OnBitrateUpdated(BitrateAllocationUpdate update,
   loss_mask_vector_.clear();
 
   uint32_t encoder_overhead_rate_bps = 0;
-  if (send_side_bwe_with_overhead_ && has_packet_feedback_) {
+  if (has_packet_feedback_) {
     // TODO(srte): The packet size should probably be the same as in the
     // CalculateOverheadRate call above (just max_total_packet_size), it doesn't
     // make sense to use different packet rates for different overhead
@@ -869,12 +887,11 @@ void RtpVideoSender::OnBitrateUpdated(BitrateAllocationUpdate update,
         encoder_overhead_rate.bps<uint32_t>(),
         update.target_bitrate.bps<uint32_t>() - encoder_target_rate_bps_);
   }
-  // When the field trial "WebRTC-SendSideBwe-WithOverhead" is enabled
-  // protection_bitrate includes overhead.
   const uint32_t media_rate = encoder_target_rate_bps_ +
                               encoder_overhead_rate_bps +
                               packetization_rate_bps;
   RTC_DCHECK_GE(update.target_bitrate, DataRate::BitsPerSec(media_rate));
+  // `protection_bitrate_bps_` includes overhead.
   protection_bitrate_bps_ = update.target_bitrate.bps() - media_rate;
 }
 

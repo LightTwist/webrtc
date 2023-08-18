@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#import "RTCAudioDevice.h"
 #import "RTCIODevice.h"
 
 NS_ASSUME_NONNULL_BEGIN

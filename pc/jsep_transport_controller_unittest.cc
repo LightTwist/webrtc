@@ -24,13 +24,12 @@
 #include "p2p/base/transport_info.h"
 #include "rtc_base/fake_ssl_identity.h"
 #include "rtc_base/gunit.h"
-#include "rtc_base/location.h"
 #include "rtc_base/logging.h"
 #include "rtc_base/net_helper.h"
-#include "rtc_base/ref_counted_object.h"
 #include "rtc_base/socket_address.h"
 #include "rtc_base/ssl_fingerprint.h"
 #include "rtc_base/ssl_identity.h"
+#include "rtc_base/task_queue_for_test.h"
 #include "rtc_base/thread.h"
 #include "test/gtest.h"
 #include "test/scoped_key_value_config.h"
@@ -104,9 +103,8 @@ class JsepTransportControllerTest : public JsepTransportController::Observer,
     config.field_trials = &field_trials_;
     transport_controller_ = std::make_unique<JsepTransportController>(
         network_thread, port_allocator, nullptr /* async_resolver_factory */,
-        config);
-    network_thread->Invoke<void>(RTC_FROM_HERE,
-                                 [&] { ConnectTransportControllerSignals(); });
+        std::move(config));
+    SendTask(network_thread, [&] { ConnectTransportControllerSignals(); });
   }
 
   void ConnectTransportControllerSignals() {
@@ -260,7 +258,7 @@ class JsepTransportControllerTest : public JsepTransportController::Observer,
 
   void CreateLocalDescriptionAndCompleteConnectionOnNetworkThread() {
     if (!network_thread_->IsCurrent()) {
-      network_thread_->Invoke<void>(RTC_FROM_HERE, [&] {
+      SendTask(network_thread_.get(), [&] {
         CreateLocalDescriptionAndCompleteConnectionOnNetworkThread();
       });
       return;
@@ -402,7 +400,7 @@ TEST_F(JsepTransportControllerTest, GetRtpTransport) {
 TEST_F(JsepTransportControllerTest, GetDtlsTransport) {
   JsepTransportController::Config config;
   config.rtcp_mux_policy = PeerConnectionInterface::kRtcpMuxPolicyNegotiate;
-  CreateJsepTransportController(config);
+  CreateJsepTransportController(std::move(config));
   auto description = CreateSessionDescriptionWithoutBundle();
   EXPECT_TRUE(transport_controller_
                   ->SetLocalDescription(SdpType::kOffer, description.get())
@@ -437,7 +435,7 @@ TEST_F(JsepTransportControllerTest, GetDtlsTransport) {
 TEST_F(JsepTransportControllerTest, GetDtlsTransportWithRtcpMux) {
   JsepTransportController::Config config;
   config.rtcp_mux_policy = PeerConnectionInterface::kRtcpMuxPolicyRequire;
-  CreateJsepTransportController(config);
+  CreateJsepTransportController(std::move(config));
   auto description = CreateSessionDescriptionWithoutBundle();
   EXPECT_TRUE(transport_controller_
                   ->SetLocalDescription(SdpType::kOffer, description.get())
@@ -979,8 +977,7 @@ TEST_F(JsepTransportControllerTest, IceSignalingOccursOnNetworkThread) {
 
   EXPECT_EQ(ice_signaled_on_thread_, network_thread_.get());
 
-  network_thread_->Invoke<void>(RTC_FROM_HERE,
-                                [&] { transport_controller_.reset(); });
+  SendTask(network_thread_.get(), [&] { transport_controller_.reset(); });
 }
 
 // Test that if the TransportController was created with the
@@ -990,7 +987,7 @@ TEST_F(JsepTransportControllerTest, IceRoleNotRedetermined) {
   JsepTransportController::Config config;
   config.redetermine_role_on_ice_restart = false;
 
-  CreateJsepTransportController(config);
+  CreateJsepTransportController(std::move(config));
   // Let the `transport_controller_` be the controlled side initially.
   auto remote_offer = std::make_unique<cricket::SessionDescription>();
   AddAudioSection(remote_offer.get(), kAudioMid1, kIceUfrag1, kIcePwd1,
@@ -2320,7 +2317,7 @@ TEST_F(JsepTransportControllerTest, RejectFirstContentInBundleGroup) {
 TEST_F(JsepTransportControllerTest, ApplyNonRtcpMuxOfferWhenMuxingRequired) {
   JsepTransportController::Config config;
   config.rtcp_mux_policy = PeerConnectionInterface::kRtcpMuxPolicyRequire;
-  CreateJsepTransportController(config);
+  CreateJsepTransportController(std::move(config));
   auto local_offer = std::make_unique<cricket::SessionDescription>();
   AddAudioSection(local_offer.get(), kAudioMid1, kIceUfrag1, kIcePwd1,
                   cricket::ICEMODE_FULL, cricket::CONNECTIONROLE_ACTPASS,
@@ -2338,7 +2335,7 @@ TEST_F(JsepTransportControllerTest, ApplyNonRtcpMuxOfferWhenMuxingRequired) {
 TEST_F(JsepTransportControllerTest, ApplyNonRtcpMuxAnswerWhenMuxingRequired) {
   JsepTransportController::Config config;
   config.rtcp_mux_policy = PeerConnectionInterface::kRtcpMuxPolicyRequire;
-  CreateJsepTransportController(config);
+  CreateJsepTransportController(std::move(config));
   auto local_offer = std::make_unique<cricket::SessionDescription>();
   AddAudioSection(local_offer.get(), kAudioMid1, kIceUfrag1, kIcePwd1,
                   cricket::ICEMODE_FULL, cricket::CONNECTIONROLE_ACTPASS,

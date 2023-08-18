@@ -372,14 +372,14 @@ void FrameCryptorTransformer::encryptFrame(
   auto key_set = key_handler->GetKeySet(key_index_);
   uint8_t unencrypted_bytes = get_unencrypted_bytes(frame.get(), type_);
 
-  rtc::Buffer frameHeader(unencrypted_bytes);
+  rtc::Buffer frame_header(unencrypted_bytes);
   for (size_t i = 0; i < unencrypted_bytes; i++) {
-    frameHeader[i] = date_in[i];
+    frame_header[i] = date_in[i];
   }
 
-  rtc::Buffer frameTrailer(2);
-  frameTrailer[0] = getIvSize();
-  frameTrailer[1] = key_index_;
+  rtc::Buffer frame_trailer(2);
+  frame_trailer[0] = getIvSize();
+  frame_trailer[1] = key_index_;
   rtc::Buffer iv = makeIv(frame->GetSsrc(), frame->GetTimestamp());
 
   rtc::Buffer payload(date_in.size() - unencrypted_bytes);
@@ -389,25 +389,25 @@ void FrameCryptorTransformer::encryptFrame(
 
   std::vector<uint8_t> buffer;
   if (AesEncryptDecrypt(EncryptOrDecrypt::kEncrypt, algorithm_,
-                        key_set->encryption_key, iv, frameHeader, payload,
+                        key_set->encryption_key, iv, frame_header, payload,
                         &buffer) == Success) {
     rtc::Buffer encrypted_payload(buffer.data(), buffer.size());
     rtc::Buffer data_out;
-    data_out.AppendData(frameHeader);
+    data_out.AppendData(frame_header);
     data_out.AppendData(encrypted_payload);
     data_out.AppendData(iv);
-    data_out.AppendData(frameTrailer);
+    data_out.AppendData(frame_trailer);
 
-    RTC_CHECK_EQ(data_out.size(), frameHeader.size() +
+    RTC_CHECK_EQ(data_out.size(), frame_header.size() +
                                       encrypted_payload.size() + iv.size() +
-                                      frameTrailer.size());
+                                      frame_trailer.size());
 
     frame->SetData(data_out);
 
     RTC_LOG(LS_INFO) << "FrameCryptorTransformer::encryptFrame() ivLength="
                      << static_cast<int>(iv.size()) << " unencrypted_bytes="
                      << static_cast<int>(unencrypted_bytes)
-                     << " keyIndex=" << static_cast<int>(key_index_)
+                     << " key_index=" << static_cast<int>(key_index_)
                      << " aesKey="
                      << to_hex(key_set->encryption_key.data(),
                                key_set->encryption_key.size())
@@ -494,16 +494,16 @@ void FrameCryptorTransformer::decryptFrame(
 
   uint8_t unencrypted_bytes = get_unencrypted_bytes(frame.get(), type_);
 
-  rtc::Buffer frameHeader(unencrypted_bytes);
+  rtc::Buffer frame_header(unencrypted_bytes);
   for (size_t i = 0; i < unencrypted_bytes; i++) {
-    frameHeader[i] = date_in[i];
+    frame_header[i] = date_in[i];
   }
 
-  rtc::Buffer frameTrailer(2);
-  frameTrailer[0] = date_in[date_in.size() - 2];
-  frameTrailer[1] = date_in[date_in.size() - 1];
-  uint8_t ivLength = frameTrailer[0];
-  uint8_t key_index = frameTrailer[1];
+  rtc::Buffer frame_trailer(2);
+  frame_trailer[0] = date_in[date_in.size() - 2];
+  frame_trailer[1] = date_in[date_in.size() - 1];
+  uint8_t ivLength = frame_trailer[0];
+  uint8_t key_index = frame_trailer[1];
 
   if (ivLength != getIvSize()) {
     RTC_LOG(LS_ERROR) << "FrameCryptorTransformer::decryptFrame() ivLength["
@@ -558,12 +558,12 @@ void FrameCryptorTransformer::decryptFrame(
   auto initialKeyMaterial = key_set->material;
   bool decryption_success = false;
   if (AesEncryptDecrypt(EncryptOrDecrypt::kDecrypt, algorithm_,
-                        key_set->encryption_key, iv, frameHeader,
+                        key_set->encryption_key, iv, frame_header,
                         encrypted_payload, &buffer) == Success) {
     decryption_success = true;
   } else {
     RTC_LOG(LS_ERROR) << "FrameCryptorTransformer::decryptFrame() failed";
-    std::shared_ptr<ParticipantKeyHandler::KeySet> ratchetedKeySet;
+    std::shared_ptr<ParticipantKeyHandler::KeySet> ratcheted_key_set;
     auto currentKeyMaterial = key_set->material;
     if (key_handler->options().ratchet_window_size > 0) {
       while (ratchet_count < key_handler->options().ratchet_window_size) {
@@ -572,18 +572,18 @@ void FrameCryptorTransformer::decryptFrame(
         RTC_LOG(LS_INFO) << "ratcheting key attempt " << ratchet_count << " of "
                          << key_handler->options().ratchet_window_size;
 
-        auto newMaterial = key_handler->RatchetKeyMaterial(currentKeyMaterial);
-        ratchetedKeySet = key_handler->DeriveKeys(newMaterial, key_handler->options().ratchet_salt, 128);
+        auto new_material = key_handler->RatchetKeyMaterial(currentKeyMaterial);
+        ratcheted_key_set = key_handler->DeriveKeys(new_material, key_handler->options().ratchet_salt, 128);
 
         if (AesEncryptDecrypt(EncryptOrDecrypt::kDecrypt, algorithm_,
-                              ratchetedKeySet->encryption_key, iv, frameHeader,
+                              ratcheted_key_set->encryption_key, iv, frame_header,
                               encrypted_payload, &buffer) == Success) {
           RTC_LOG(LS_INFO) << "FrameCryptorTransformer::decryptFrame() "
-                              "ratcheted to keyIndex="
+                              "ratcheted to key_index="
                            << static_cast<int>(key_index);
           decryption_success = true;
           // success, so we set the new key
-          key_handler->SetKeyFromMaterial(newMaterial, key_index);
+          key_handler->SetKeyFromMaterial(new_material, key_index);
           if (last_dec_error_ != FrameCryptionState::kKeyRatcheted) {
             last_dec_error_ = FrameCryptionState::kKeyRatcheted;
             if (observer_)
@@ -593,7 +593,7 @@ void FrameCryptorTransformer::decryptFrame(
           break;
         }
         // for the next ratchet attempt
-        currentKeyMaterial = newMaterial;
+        currentKeyMaterial = new_material;
       }
 
       /* Since the key it is first send and only afterwards actually used for
@@ -622,14 +622,14 @@ void FrameCryptorTransformer::decryptFrame(
 
   rtc::Buffer payload(buffer.data(), buffer.size());
   rtc::Buffer data_out;
-  data_out.AppendData(frameHeader);
+  data_out.AppendData(frame_header);
   data_out.AppendData(payload);
   frame->SetData(data_out);
 
   RTC_LOG(LS_INFO) << "FrameCryptorTransformer::decryptFrame() ivLength="
                    << static_cast<int>(ivLength) << " unencrypted_bytes="
                    << static_cast<int>(unencrypted_bytes)
-                   << " keyIndex=" << static_cast<int>(key_index_) << " aesKey="
+                   << " key_index=" << static_cast<int>(key_index_) << " aesKey="
                    << to_hex(key_set->encryption_key.data(),
                              key_set->encryption_key.size())
                    << " iv=" << to_hex(iv.data(), iv.size());
@@ -643,18 +643,18 @@ void FrameCryptorTransformer::decryptFrame(
 }
 
 rtc::Buffer FrameCryptorTransformer::makeIv(uint32_t ssrc, uint32_t timestamp) {
-  uint32_t sendCount = 0;
-  if (sendCounts_.find(ssrc) == sendCounts_.end()) {
+  uint32_t send_count = 0;
+  if (send_counts_.find(ssrc) == send_counts_.end()) {
     srand((unsigned)time(NULL));
-    sendCounts_[ssrc] = floor(rand() * 0xFFFF);
+    send_counts_[ssrc] = floor(rand() * 0xFFFF);
   } else {
-    sendCount = sendCounts_[ssrc];
+    send_count = send_counts_[ssrc];
   }
   rtc::ByteBufferWriter buf;
   buf.WriteUInt32(ssrc);
   buf.WriteUInt32(timestamp);
-  buf.WriteUInt32(timestamp - (sendCount % 0xFFFF));
-  sendCounts_[ssrc] = sendCount + 1;
+  buf.WriteUInt32(timestamp - (send_count % 0xFFFF));
+  send_counts_[ssrc] = send_count + 1;
 
   RTC_CHECK_EQ(buf.Length(), getIvSize());
 

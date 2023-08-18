@@ -33,8 +33,8 @@ const void* GetSystemQueueRef() {
 
 }  // namespace
 
-SequenceCheckerImpl::SequenceCheckerImpl()
-    : attached_(true),
+SequenceCheckerImpl::SequenceCheckerImpl(bool attach_to_current_thread)
+    : attached_(attach_to_current_thread),
       valid_thread_(rtc::CurrentThreadRef()),
       valid_queue_(TaskQueueBase::Current()),
       valid_system_queue_(GetSystemQueueRef()) {}
@@ -103,14 +103,6 @@ std::string SequenceCheckerImpl::ExpectationToString() const {
   return message.Release();
 }
 #endif  // RTC_DCHECK_IS_ON
-
-std::string ExpectationToString(const SequenceCheckerImpl* checker) {
-#if RTC_DCHECK_IS_ON
-  return checker->ExpectationToString();
-#else
-  return std::string();
-#endif
-}
 
 }  // namespace webrtc_sequence_checker_internal
 }  // namespace webrtc

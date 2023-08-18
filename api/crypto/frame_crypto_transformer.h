@@ -59,37 +59,37 @@ class ParticipantKeyHandler {
 
  public:
   ParticipantKeyHandler(KeyProviderOptions options) : options_(options) {
-    cryptoKeyRing_.resize(KEYRING_SIZE);
+    crypto_key_ring_.resize(KEYRING_SIZE);
   }
 
   virtual ~ParticipantKeyHandler() = default;
 
-  virtual std::vector<uint8_t> RatchetKey(int keyIndex) {
-    auto currentMaterial = GetKeySet(keyIndex)->material;
-    std::vector<uint8_t> newMaterial;
-    if (DerivePBKDF2KeyFromRawKey(currentMaterial, options_.ratchet_salt, 256,
-                                  &newMaterial) != 0) {
+  virtual std::vector<uint8_t> RatchetKey(int key_index) {
+    auto current_material = GetKeySet(key_index)->material;
+    std::vector<uint8_t> new_material;
+    if (DerivePBKDF2KeyFromRawKey(current_material, options_.ratchet_salt, 256,
+                                  &new_material) != 0) {
       return std::vector<uint8_t>();
     }
-    SetKeyFromMaterial(newMaterial,
-                       keyIndex != -1 ? keyIndex : currentKeyIndex);
-    return newMaterial;
+    SetKeyFromMaterial(new_material,
+                       key_index != -1 ? key_index : current_key_index_);
+    return new_material;
   }
 
-  virtual std::shared_ptr<KeySet> GetKeySet(int keyIndex) {
-    return cryptoKeyRing_[keyIndex != -1 ? keyIndex : currentKeyIndex];
+  virtual std::shared_ptr<KeySet> GetKeySet(int key_index) {
+    return crypto_key_ring_[key_index != -1 ? key_index : current_key_index_];
   }
 
-  virtual void SetKey(std::vector<uint8_t> password, int keyIndex) {
-    SetKeyFromMaterial(password, keyIndex);
+  virtual void SetKey(std::vector<uint8_t> password, int key_index) {
+    SetKeyFromMaterial(password, key_index);
     have_valid_key = true;
   }
 
-  virtual void SetKeyFromMaterial(std::vector<uint8_t> password, int keyIndex) {
-    if (keyIndex >= 0) {
-      currentKeyIndex = keyIndex % cryptoKeyRing_.size();
+  virtual void SetKeyFromMaterial(std::vector<uint8_t> password, int key_index) {
+    if (key_index >= 0) {
+      current_key_index_ = key_index % crypto_key_ring_.size();
     }
-    cryptoKeyRing_[currentKeyIndex] =
+    crypto_key_ring_[current_key_index_] =
         DeriveKeys(password, options_.ratchet_salt, 128);
   }
 
@@ -107,20 +107,20 @@ class ParticipantKeyHandler {
   }
 
   std::vector<uint8_t> RatchetKeyMaterial(
-      std::vector<uint8_t> currentMaterial) {
-    std::vector<uint8_t> newMaterial;
-    if (DerivePBKDF2KeyFromRawKey(currentMaterial, options_.ratchet_salt, 256,
-                                  &newMaterial) != 0) {
+      std::vector<uint8_t> current_material) {
+    std::vector<uint8_t> new_material;
+    if (DerivePBKDF2KeyFromRawKey(current_material, options_.ratchet_salt, 256,
+                                  &new_material) != 0) {
       return std::vector<uint8_t>();
     }
-    return newMaterial;
+    return new_material;
   }
  protected:
   bool have_valid_key = false;
  private:
-  int currentKeyIndex = 0;
+  int current_key_index_ = 0;
   KeyProviderOptions options_;
-  std::vector<std::shared_ptr<KeySet>> cryptoKeyRing_;
+  std::vector<std::shared_ptr<KeySet>> crypto_key_ring_;
 };
 
 class KeyProvider : public rtc::RefCountInterface {
@@ -163,8 +163,8 @@ class DefaultKeyProviderImpl : public KeyProvider {
       keys_[participant_id] = std::make_shared<ParticipantKeyHandler>(options_);
     }
 
-    auto keyHandler = keys_[participant_id];
-    keyHandler->SetKey(key, index);
+    auto key_handler = keys_[participant_id];
+    key_handler->SetKey(key, index);
     return true;
   }
 
@@ -195,13 +195,13 @@ class DefaultKeyProviderImpl : public KeyProvider {
       return std::vector<uint8_t>();
     }
 
-    auto keySet = GetKey(participant_id);
+    auto key_set = GetKey(participant_id);
 
-    if (!keySet) {
+    if (!key_set) {
       return std::vector<uint8_t>();
     }
 
-    return keySet->GetKeySet(key_index)->material;
+    return key_set->GetKeySet(key_index)->material;
   }
 
   KeyProviderOptions& options() override { return options_; }
@@ -260,7 +260,7 @@ class RTC_EXPORT FrameCryptorTransformer
     key_index_ = index;
   }
 
-  virtual int key_index() const { return key_index_; };
+  virtual int key_index() const { return key_index_; }
 
   virtual void SetEnabled(bool enabled) {
     webrtc::MutexLock lock(&mutex_);
@@ -269,7 +269,7 @@ class RTC_EXPORT FrameCryptorTransformer
   virtual bool enabled() const {
     webrtc::MutexLock lock(&mutex_);
     return enabled_cryption_;
-  };
+  }
   virtual const std::string participant_id() const { return participant_id_; }
 
  protected:
@@ -316,7 +316,7 @@ class RTC_EXPORT FrameCryptorTransformer
   std::map<uint32_t, rtc::scoped_refptr<webrtc::TransformedFrameCallback>>
       sink_callbacks_;
   int key_index_ = 0;
-  std::map<uint32_t, uint32_t> sendCounts_;
+  std::map<uint32_t, uint32_t> send_counts_;
   rtc::scoped_refptr<KeyProvider> key_provider_;
   FrameCryptorTransformerObserver* observer_ = nullptr;
   std::unique_ptr<rtc::Thread> thread_;

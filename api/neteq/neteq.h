@@ -67,6 +67,7 @@ struct NetEqLifetimeStatistics {
   uint64_t jitter_buffer_delay_ms = 0;
   uint64_t jitter_buffer_emitted_count = 0;
   uint64_t jitter_buffer_target_delay_ms = 0;
+  uint64_t jitter_buffer_minimum_delay_ms = 0;
   uint64_t inserted_samples_for_deceleration = 0;
   uint64_t removed_samples_for_acceleration = 0;
   uint64_t silent_concealed_samples = 0;
@@ -127,7 +128,7 @@ class NetEq {
 
     std::string ToString() const;
 
-    int sample_rate_hz = 16000;  // Initial value. Will change with input data.
+    int sample_rate_hz = 48000;  // Initial value. Will change with input data.
     bool enable_post_decode_vad = false;
     size_t max_packets_in_buffer = 200;
     int max_delay_ms = 0;
