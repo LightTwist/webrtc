@@ -68,8 +68,6 @@ class TransformableVideoFrameInterface : public TransformableFrameInterface {
 
   virtual void SetMetadata(const VideoFrameMetadata&) = 0;
 
-  virtual const VideoFrameMetadata& GetMetadata() const = 0;
-
   virtual const RTPVideoHeader& header () const = 0;
 };
 
