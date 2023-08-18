@@ -81,12 +81,6 @@ public class RtpReceiver {
     nativeSetFrameDecryptor(nativeRtpReceiver, frameDecryptor.getNativeFrameDecryptor());
   }
 
-  /** Returns a pointer to webrtc::RtpReceiverInterface. */
-  long getNativeRtpReceiver() {
-    checkRtpReceiverExists();
-    return nativeRtpReceiver;
-  }
-
   private void checkRtpReceiverExists() {
     if (nativeRtpReceiver == 0) {
       throw new IllegalStateException("RtpReceiver has been disposed.");

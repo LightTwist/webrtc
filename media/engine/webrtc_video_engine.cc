@@ -3206,18 +3206,6 @@ void WebRtcVideoChannel::WebRtcVideoReceiveStream::StopStream() {
   if (stream_) {
     stream_->Stop();
   }
-  if (params.flexfec_payload_type) {
-    flexfec_config_.payload_type = *params.flexfec_payload_type;
-    // TODO(tommi): See if it is better to always have a flexfec stream object
-    // configured and instead of recreating the video stream, reconfigure the
-    // flexfec object from within the rtp callback (soon to be on the network
-    // thread).
-    if (flexfec_stream_ || flexfec_config_.IsCompleteAndEnabled())
-      video_needs_recreation = true;
-  }
-  if (video_needs_recreation) {
-    RecreateReceiveStream();
-  }
 }
 
 void WebRtcVideoChannel::WebRtcVideoReceiveStream::RecreateReceiveStream() {

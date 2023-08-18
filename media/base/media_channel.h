@@ -999,9 +999,6 @@ class VideoMediaReceiveChannelInterface : public MediaReceiveChannelInterface {
                                              absl::optional<int> rtx_time) = 0;
   virtual void StartReceive(uint32_t ssrc) {}
   virtual void StopReceive(uint32_t ssrc) {}
-
-  virtual void StartReceive(uint32_t ssrc) {}
-  virtual void StopReceive(uint32_t ssrc) {}
 };
 
 }  // namespace cricket

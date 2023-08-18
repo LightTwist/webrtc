@@ -69,9 +69,6 @@ class AudioState : public webrtc::AudioState {
   // Returns true when at least 1 stream exists and all streams are not muted.
   bool ShouldRecord();
 
-  // Returns true when at least 1 stream exists and all streams are not muted.
-  bool ShouldRecord();
-
   SequenceChecker thread_checker_;
   SequenceChecker process_thread_checker_{SequenceChecker::kDetached};
   const webrtc::AudioState::Config config_;

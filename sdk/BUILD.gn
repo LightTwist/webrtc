@@ -1184,7 +1184,7 @@ if (is_ios || is_mac) {
         "../system_wrappers:metrics",
       ]
 
-      if (is_ios || is_mac) {
+      if (is_ios) {
         deps += [ ":native_api_audio_device_module" ]
       }
     }
