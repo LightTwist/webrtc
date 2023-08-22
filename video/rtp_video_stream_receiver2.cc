@@ -814,8 +814,8 @@ void RtpVideoStreamReceiver2::OnInsertedPacket(
 
       const video_coding::PacketBuffer::Packet& last_packet = *packet;
 
-      fprintf(stderr, "RtpVideoStreamReceiver2::OnInsertedPacket\n");
-      fprintf(stderr, "ntp_estimator_.Estimate %lld\n", ntp_estimator_.Estimate(first_packet->timestamp));
+      // fprintf(stderr, "RtpVideoStreamReceiver2::OnInsertedPacket\n");
+      // fprintf(stderr, "ntp_estimator_.Estimate %lld\n", ntp_estimator_.Estimate(first_packet->timestamp));
 
       // fprintf(stderr, "first_packet->seq_num: %d\n", first_packet->seq_num);
       // fprintf(stderr, "last_packet.seq_num: %d\n", last_packet.seq_num);
