@@ -245,6 +245,11 @@ class WebRtcVoiceMediaChannel final : public VoiceMediaChannel,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override;
 
+  void SetSenderReportCallback(
+      uint32_t ssrc,
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      override;
+
   // implements Transport interface
   bool SendRtp(const uint8_t* data,
                size_t len,

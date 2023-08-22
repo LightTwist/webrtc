@@ -563,6 +563,8 @@ ChannelReceive::ChannelReceive(
       frame_decryptor_(frame_decryptor),
       crypto_options_(crypto_options),
       absolute_capture_time_interpolator_(clock) {
+
+  fprintf(stderr, "ChannelReceive::ChannelReceive\n");
   RTC_DCHECK(audio_device_module);
 
   network_thread_checker_.Detach();

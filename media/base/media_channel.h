@@ -319,6 +319,11 @@ class MediaReceiveChannelInterface
       uint32_t ssrc,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface>
           frame_transformer) = 0;
+
+  virtual void SetSenderReportCallback(
+      uint32_t ssrc,
+      rtc::scoped_refptr<webrtc::SenderReportInterface>
+          sender_report_interface) = 0;
 };
 
 // The stats information is structured as follows:

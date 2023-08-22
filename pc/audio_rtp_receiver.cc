@@ -295,6 +295,17 @@ void AudioRtpReceiver::SetDepacketizerToDecoderFrameTransformer(
   frame_transformer_ = std::move(frame_transformer);
 }
 
+void AudioRtpReceiver::SetSenderReportCallback(
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {
+  fprintf(stderr, "AudioRtpReceiver::SetSenderReportCallback\n");
+  RTC_DCHECK_RUN_ON(worker_thread_);
+  if (media_channel_) {
+    // media_channel_->SetSenderReportCallback(
+    //     signaled_ssrc_.value_or(0), sender_report_interface);
+  }
+  // frame_transformer_ = std::move(frame_transformer);
+}
+
 void AudioRtpReceiver::Reconfigure(bool track_enabled) {
   RTC_DCHECK_RUN_ON(worker_thread_);
   RTC_DCHECK(media_channel_);

@@ -1239,6 +1239,13 @@ class WebRtcVoiceMediaChannel::WebRtcAudioReceiveStream {
     stream_->SetDepacketizerToDecoderFrameTransformer(frame_transformer);
   }
 
+  void SetSenderReportCallback(
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {
+    RTC_DCHECK_RUN_ON(&worker_thread_checker_);
+    fprintf(stderr, "WebRtcAudioReceiveStream::SetSenderReportCallback\n");
+    // stream_->SetDepacketizerToDecoderFrameTransformer(frame_transformer);
+  }
+
  private:
   webrtc::SequenceChecker worker_thread_checker_;
   webrtc::Call* call_ = nullptr;
@@ -2570,6 +2577,28 @@ void WebRtcVoiceMediaChannel::SetDepacketizerToDecoderFrameTransformer(
   }
   matching_stream->second->SetDepacketizerToDecoderFrameTransformer(
       std::move(frame_transformer));
+}
+
+void WebRtcVoiceMediaChannel::SetSenderReportCallback(
+    uint32_t ssrc,
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {
+  RTC_DCHECK_RUN_ON(worker_thread_);
+  fprintf(stderr, "WebRtcVoiceMediaChannel::SetSenderReportCallback\n");
+  // if (ssrc == 0) {
+  //   // If the receiver is unsignaled, save the frame transformer and set it when
+  //   // the stream is associated with an ssrc.
+  //   unsignaled_frame_transformer_ = std::move(frame_transformer);
+  //   return;
+  // }
+
+  // auto matching_stream = recv_streams_.find(ssrc);
+  // if (matching_stream == recv_streams_.end()) {
+  //   RTC_LOG(LS_INFO) << "Attempting to set frame transformer for SSRC:" << ssrc
+  //                    << " which doesn't exist.";
+  //   return;
+  // }
+  // matching_stream->second->SetDepacketizerToDecoderFrameTransformer(
+  //     std::move(frame_transformer));
 }
 
 bool WebRtcVoiceMediaChannel::SendRtp(const uint8_t* data,

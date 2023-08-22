@@ -139,6 +139,9 @@ void AudioIngress::SetReceiveCodecs(
 
 void AudioIngress::ReceivedRTPPacket(rtc::ArrayView<const uint8_t> rtp_packet) {
   RtpPacketReceived rtp_packet_received;
+  
+  fprintf(stderr, "AudioIngress::ReceivedRTPPacket\n");
+
   rtp_packet_received.Parse(rtp_packet.data(), rtp_packet.size());
 
   // Set payload type's sampling rate before we feed it into ReceiveStatistics.

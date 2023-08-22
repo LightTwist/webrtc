@@ -3441,6 +3441,16 @@ void WebRtcVideoChannel::WebRtcVideoReceiveStream::
     stream_->SetDepacketizerToDecoderFrameTransformer(frame_transformer);
 }
 
+void WebRtcVideoChannel::WebRtcVideoReceiveStream::
+    SetSenderReportCallback(
+        rtc::scoped_refptr<webrtc::SenderReportInterface>
+            frame_transformer) {
+  fprintf(stderr, "WebRtcVideoChannel::WebRtcVideoReceiveStream::SetSenderReportCallback\n");
+  // config_.frame_transformer = frame_transformer;
+  // if (stream_)
+  //   stream_->SetDepacketizerToDecoderFrameTransformer(frame_transformer);
+}
+
 void WebRtcVideoChannel::WebRtcVideoReceiveStream::SetLocalSsrc(uint32_t ssrc) {
   config_.rtp.local_ssrc = ssrc;
   call_->OnLocalSsrcUpdated(stream(), ssrc);

@@ -34,6 +34,8 @@ AudioChannel::AudioChannel(
     AudioMixer* audio_mixer,
     rtc::scoped_refptr<AudioDecoderFactory> decoder_factory)
     : audio_mixer_(audio_mixer) {
+
+  fprintf(stderr, "AudioChannel::AudioChannel\n");
   RTC_DCHECK(task_queue_factory);
   RTC_DCHECK(audio_mixer);
 

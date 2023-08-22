@@ -18,6 +18,7 @@
 #include "api/video/encoded_frame.h"
 #include "api/video/video_frame_metadata.h"
 #include "rtc_base/ref_count.h"
+#include "modules/rtp_rtcp/source/rtcp_packet/sender_report.h"
 
 namespace webrtc {
 
@@ -112,6 +113,15 @@ class FrameTransformerInterface : public rtc::RefCountInterface {
 
  protected:
   ~FrameTransformerInterface() override = default;
+};
+
+class SenderReportInterface : public rtc::RefCountInterface {
+ public:
+  virtual void OnSenderReport(
+      std::unique_ptr<rtcp::SenderReport> sender_report) = 0;
+
+ protected:
+  ~SenderReportInterface() override = default;
 };
 
 }  // namespace webrtc

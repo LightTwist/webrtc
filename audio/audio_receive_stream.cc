@@ -63,6 +63,9 @@ std::unique_ptr<voe::ChannelReceiveInterface> CreateChannelReceive(
     NetEqFactory* neteq_factory,
     const webrtc::AudioReceiveStreamInterface::Config& config,
     RtcEventLog* event_log) {
+
+  fprintf(stderr, "CreateChannelReceive\n");
+
   RTC_DCHECK(audio_state);
   internal::AudioState* internal_audio_state =
       static_cast<internal::AudioState*>(audio_state);
@@ -93,7 +96,9 @@ AudioReceiveStreamImpl::AudioReceiveStreamImpl(
                                                   audio_state.get(),
                                                   neteq_factory,
                                                   config,
-                                                  event_log)) {}
+                                                  event_log)) {
+    fprintf(stderr, "AudioReceiveStreamImpl::AudioReceiveStreamImpl\n");
+                                                  }
 
 AudioReceiveStreamImpl::AudioReceiveStreamImpl(
     Clock* clock,

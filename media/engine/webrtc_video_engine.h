@@ -237,6 +237,11 @@ class WebRtcVideoChannel : public VideoMediaChannel,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override;
 
+  void SetSenderReportCallback(
+      uint32_t ssrc,
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      override;
+
   // Information queries to support SetReceiverFeedbackParameters
   webrtc::RtcpMode SendCodecRtcpMode() const override {
     RTC_DCHECK_RUN_ON(&thread_checker_);
@@ -539,6 +544,10 @@ class WebRtcVideoChannel : public VideoMediaChannel,
     void SetDepacketizerToDecoderFrameTransformer(
         rtc::scoped_refptr<webrtc::FrameTransformerInterface>
             frame_transformer);
+
+    void SetSenderReportCallback(
+        rtc::scoped_refptr<webrtc::SenderReportInterface>
+            sender_report_interface);
     
     void StartStream();
     void StopStream();

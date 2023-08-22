@@ -516,6 +516,13 @@ class VoiceMediaReceiveChannel : public VoiceMediaReceiveChannelInterface {
       override {
     impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
   }
+  void SetSenderReportCallback(
+      uint32_t ssrc,
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      override {
+        fprintf(stderr, "VoiceMediaReceiveChannel::SetSenderReportCallback\n");
+    //impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
+  }
   // Implementation of VoiceMediaReceiveChannelInterface
   bool SetRecvParameters(const AudioRecvParameters& params) override {
     return impl()->SetRecvParameters(params);
@@ -749,6 +756,13 @@ class VideoMediaReceiveChannel : public VideoMediaReceiveChannelInterface {
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override {
     impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
+  }
+  void SetSenderReportCallback(
+      uint32_t ssrc,
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      override {
+      fprintf(stderr, "VoiceMediaReceiveChannel::SetSenderReportCallback\n");
+    // impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
   }
   // Implementation on videoMediaReceiveChannelInterface
   bool SetRecvParameters(const VideoRecvParameters& params) override {

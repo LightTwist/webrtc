@@ -120,6 +120,10 @@ class AudioRtpReceiver : public ObserverInterface,
   void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override;
+
+  void SetSenderReportCallback(
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      override;
   
   void LTRequestKeyFrame() override;
 

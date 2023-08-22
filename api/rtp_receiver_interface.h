@@ -114,6 +114,9 @@ class RTC_EXPORT RtpReceiverInterface : public rtc::RefCountInterface {
   virtual void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<FrameTransformerInterface> frame_transformer);
 
+  virtual void SetSenderReportCallback(
+      rtc::scoped_refptr<SenderReportInterface> sender_report_interface);
+
   virtual void LTRequestKeyFrame() = 0;
 
  protected:

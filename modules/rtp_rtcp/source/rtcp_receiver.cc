@@ -48,6 +48,9 @@
 #include "rtc_base/trace_event.h"
 #include "system_wrappers/include/ntp_time.h"
 
+#include <execinfo.h>
+#include <stdio.h>
+
 namespace webrtc {
 namespace {
 
@@ -164,6 +167,15 @@ RTCPReceiver::RTCPReceiver(const RtpRtcpInterface::Configuration& config,
       packet_type_counter_observer_(config.rtcp_packet_type_counter_observer),
       num_skipped_packets_(0),
       last_skipped_packets_warning_ms_(clock_->TimeInMilliseconds()) {
+
+        void *array[10];
+        size_t size;
+
+        // get void*'s for all entries on the stack
+        size = backtrace(array, 10);
+
+        // print out all the frames to stderr
+        backtrace_symbols_fd(array, size, STDERR_FILENO);
   RTC_DCHECK(owner);
 }
 
