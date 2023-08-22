@@ -815,7 +815,7 @@ void RtpVideoStreamReceiver2::OnInsertedPacket(
       const video_coding::PacketBuffer::Packet& last_packet = *packet;
 
       fprintf(stderr, "RtpVideoStreamReceiver2::OnInsertedPacket\n");
-      fprintf(stderr, "ntp_estimator_.Estimate %ld\n", ntp_estimator_.Estimate(first_packet->timestamp));
+      fprintf(stderr, "ntp_estimator_.Estimate %lld\n", ntp_estimator_.Estimate(first_packet->timestamp));
 
       // fprintf(stderr, "first_packet->seq_num: %d\n", first_packet->seq_num);
       // fprintf(stderr, "last_packet.seq_num: %d\n", last_packet.seq_num);
@@ -867,8 +867,8 @@ void RtpVideoStreamReceiver2::OnAssembledFrame(
   //   // fprintf(stderr, "RtpVideoStreamReceiver2::OnAssembledFrame no descriptor\n");
   // }
 
-  fprintf(stderr, "RtpVideoStreamReceiver2::OnAssembledFrame\n");
-  fprintf(stderr, "first_seq_num: %d, last_seq_num: %d\n", frame->first_seq_num(), frame->last_seq_num());
+  //fprintf(stderr, "RtpVideoStreamReceiver2::OnAssembledFrame\n");
+  //fprintf(stderr, "first_seq_num: %d, last_seq_num: %d\n", frame->first_seq_num(), frame->last_seq_num());
 
   if (loss_notification_controller_ && descriptor) {
     loss_notification_controller_->OnAssembledFrame(
