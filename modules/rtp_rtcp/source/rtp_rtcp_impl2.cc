@@ -496,6 +496,12 @@ ModuleRtpRtcpImpl2::GetSenderReportStats() const {
   return rtcp_receiver_.GetSenderReportStats();
 }
 
+void ModuleRtpRtcpImpl2::SetSenderReportCallback(rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
+  //sender_report_callback_ = sender_report_callback;
+  fprintf(stderr, "ModuleRtpRtcpImpl2::SetSenderReportCallback\n");
+  rtcp_receiver_.SetSenderReportCallback(sender_report_callback);
+}
+
 absl::optional<RtpRtcpInterface::NonSenderRttStats>
 ModuleRtpRtcpImpl2::GetNonSenderRttStats() const {
   RTCPReceiver::NonSenderRttStats non_sender_rtt_stats =

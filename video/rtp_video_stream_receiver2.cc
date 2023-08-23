@@ -983,8 +983,11 @@ void RtpVideoStreamReceiver2::SetSenderReportCallback(
     rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
   fprintf(stderr, "RtpVideoStreamReceiver2::SetSenderReportCallback\n");
 
-  RTC_DCHECK_RUN_ON(&worker_task_checker_);
-  sender_report_callback_ = sender_report_callback;
+  // RTC_DCHECK_RUN_ON(&worker_task_checker_);
+
+  rtp_rtcp_->SetSenderReportCallback(sender_report_callback);
+  // sender_report_callback_ = sender_report_callback;
+
       // rtc::make_ref_counted<SenderReportInterface>(
       //     this, std::move(sender_report_callback), rtc::Thread::Current(),
       //     config_.rtp.remote_ssrc);
@@ -1182,16 +1185,14 @@ bool RtpVideoStreamReceiver2::DeliverRtcp(const uint8_t* rtcp_packet,
     return true;
   }
 
-  fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp - checking sender_report_callback_\n");
-
-  if (sender_report_callback_ != nullptr) {
-    std::unique_ptr<LTSenderReport> sr = std::make_unique<LTSenderReport>();
-    fprintf(stderr, "calling callback\n");
-    sender_report_callback_->OnSenderReport(std::move(sr));
-  }
-  else {
-    fprintf(stderr, "sender_report_callback_ was null\n");
-  }
+  // if (sender_report_callback_ != nullptr) {
+  //   std::unique_ptr<LTSenderReport> sr = std::make_unique<LTSenderReport>(rtcp_packet, rtcp_packet_length);
+  //   fprintf(stderr, "calling callback\n");
+  //   sender_report_callback_->OnSenderReport(std::move(sr));
+  // }
+  // else {
+  //   fprintf(stderr, "sender_report_callback_ was null\n");
+  // }
 
   int64_t rtt = 0;
   rtp_rtcp_->RTT(config_.rtp.remote_ssrc, &rtt, nullptr, nullptr, nullptr);

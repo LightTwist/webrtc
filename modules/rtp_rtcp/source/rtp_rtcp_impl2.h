@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "api/scoped_refptr.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "api/rtp_headers.h"
@@ -72,6 +73,8 @@ class ModuleRtpRtcpImpl2 final : public RtpRtcpInterface,
   void SetRemoteSSRC(uint32_t ssrc) override;
 
   void SetLocalSsrc(uint32_t local_ssrc) override;
+
+  void SetSenderReportCallback(rtc::scoped_refptr<SenderReportInterface> sender_report_callback);
 
   // Sender part.
   void RegisterSendPayloadFrequency(int payload_type,
@@ -169,6 +172,9 @@ class ModuleRtpRtcpImpl2 final : public RtpRtcpInterface,
   void OnPacketSendingThreadSwitched() override;
 
   // RTCP part.
+
+  rtc::scoped_refptr<SenderReportInterface>
+      sender_report_callback_;
 
   // Get RTCP status.
   RtcpMode RTCP() const override;

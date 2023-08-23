@@ -108,6 +108,9 @@ class RTCPReceiver final {
   void SetRemoteSSRC(uint32_t ssrc);
   uint32_t RemoteSSRC() const;
 
+  void SetSenderReportCallback(
+    rtc::scoped_refptr<SenderReportInterface> sender_report_callback);
+
   bool receiver_only() const { return receiver_only_; }
 
   // Returns stats based on the received RTCP Sender Reports.
@@ -424,6 +427,9 @@ class RTCPReceiver final {
 
   size_t num_skipped_packets_;
   int64_t last_skipped_packets_warning_ms_;
+
+  rtc::scoped_refptr<SenderReportInterface>
+       sender_report_callback_;
 };
 }  // namespace webrtc
 #endif  // MODULES_RTP_RTCP_SOURCE_RTCP_RECEIVER_H_

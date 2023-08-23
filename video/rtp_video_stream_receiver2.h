@@ -427,8 +427,8 @@ class RtpVideoStreamReceiver2 : public LossNotificationSender,
   rtc::scoped_refptr<RtpVideoStreamReceiverFrameTransformerDelegate>
       frame_transformer_delegate_;
 
-  rtc::scoped_refptr<SenderReportInterface>
-      sender_report_callback_;
+//   rtc::scoped_refptr<SenderReportInterface>
+//       sender_report_callback_;
 
   SeqNumUnwrapper<uint16_t> rtp_seq_num_unwrapper_
       RTC_GUARDED_BY(packet_sequence_checker_);

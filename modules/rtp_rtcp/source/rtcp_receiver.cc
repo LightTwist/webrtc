@@ -262,6 +262,12 @@ uint32_t RTCPReceiver::RemoteSSRC() const {
   return remote_ssrc_;
 }
 
+void RTCPReceiver::SetSenderReportCallback(
+    rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
+  fprintf(stderr, "RTCPReceiver::SetSenderReportCallback\n");
+  sender_report_callback_ = sender_report_callback;
+}
+
 void RTCPReceiver::RttStats::AddRtt(TimeDelta rtt) {
   last_rtt_ = rtt;
   if (rtt < min_rtt_) {
@@ -553,14 +559,20 @@ bool RTCPReceiver::ParseCompoundPacket(rtc::ArrayView<const uint8_t> packet,
 
 bool RTCPReceiver::HandleSenderReport(const CommonHeader& rtcp_block,
                                       PacketInformation* packet_information) {
-  fprintf(stderr, "Got a SenderReport!\n");
-
+  fprintf(stderr, "RTCPReceiver::HandleSenderReport\n");
   rtcp::SenderReport sender_report;
   if (!sender_report.Parse(rtcp_block)) {
     return false;
   }
 
-  
+  if (sender_report_callback_ != nullptr) {
+    std::unique_ptr<LTSenderReport> sr = std::make_unique<LTSenderReport>(sender_report);
+    fprintf(stderr, "calling callback\n");
+    sender_report_callback_->OnSenderReport(std::move(sr));
+  }
+  else {
+    fprintf(stderr, "sender_report_callback_ not set\n");
+  }
 
   const uint32_t remote_ssrc = sender_report.sender_ssrc();
 
