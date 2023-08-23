@@ -565,16 +565,16 @@ bool RTCPReceiver::HandleSenderReport(const CommonHeader& rtcp_block,
     return false;
   }
 
+  const uint32_t remote_ssrc = sender_report.sender_ssrc();
+
   if (sender_report_callback_ != nullptr) {
-    std::unique_ptr<LTSenderReport> sr = std::make_unique<LTSenderReport>(sender_report);
+    std::unique_ptr<LTSenderReport> sr = std::make_unique<LTSenderReport>(remote_ssrc, sender_report);
     fprintf(stderr, "calling callback\n");
     sender_report_callback_->OnSenderReport(std::move(sr));
   }
   else {
     fprintf(stderr, "sender_report_callback_ not set\n");
   }
-
-  const uint32_t remote_ssrc = sender_report.sender_ssrc();
 
   packet_information->remote_ssrc = remote_ssrc;
 

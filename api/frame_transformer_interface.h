@@ -118,9 +118,12 @@ class FrameTransformerInterface : public rtc::RefCountInterface {
 
 class LTSenderReport {
 public:
-  LTSenderReport(rtcp::SenderReport sender_report):
-  sender_report_(sender_report) {}
+  LTSenderReport(uint32_t ssrc, rtcp::SenderReport sender_report):
+    sender_report_(sender_report),
+    ssrc_(ssrc) 
+  {}
   rtcp::SenderReport sender_report_;
+  uint32_t ssrc_;
 };
 
 class SenderReportInterface : public rtc::RefCountInterface {
