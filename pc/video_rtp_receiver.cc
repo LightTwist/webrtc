@@ -119,6 +119,17 @@ void VideoRtpReceiver::SetDepacketizerToDecoderFrameTransformer(
   }
 }
 
+void VideoRtpReceiver::SetSenderReportCallback(
+    rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
+  fprintf(stderr, "VideoRtpReceiver::SetSenderReportCallback\n");
+  RTC_DCHECK_RUN_ON(worker_thread_);
+  sender_report_callback_ = std::move(sender_report_callback);
+  if (media_channel_) {
+    media_channel_->SetSenderReportCallback(
+        signaled_ssrc_.value_or(0), sender_report_callback_);
+  }
+}
+
 void VideoRtpReceiver::Stop() {
   RTC_DCHECK_RUN_ON(&signaling_thread_checker_);
   source_->SetState(MediaSourceInterface::kEnded);

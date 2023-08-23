@@ -178,6 +178,9 @@ class ChannelReceive : public ChannelReceiveInterface,
   void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override;
+  void SetSenderReportCallback(
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback)
+      override;
 
   void SetFrameDecryptor(rtc::scoped_refptr<webrtc::FrameDecryptorInterface>
                              frame_decryptor) override;
@@ -929,6 +932,18 @@ void ChannelReceive::SetDepacketizerToDecoderFrameTransformer(
   }
 
   InitFrameTransformerDelegate(std::move(frame_transformer));
+}
+
+void ChannelReceive::SetSenderReportCallback(
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback) {
+  fprintf(stderr, "ChannelReceive::SetSenderReportCallback\n");
+  RTC_DCHECK_RUN_ON(&worker_thread_checker_);
+
+  // if(sender_report_callback_ && sender_report_callback) {
+  //   sender_report_callback_->Reset();
+  // }
+
+  //InitFrameTransformerDelegate(std::move(sender_report_callback));
 }
 
 void ChannelReceive::SetFrameDecryptor(

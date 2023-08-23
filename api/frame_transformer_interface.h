@@ -17,6 +17,7 @@
 #include "api/scoped_refptr.h"
 #include "api/video/encoded_frame.h"
 #include "api/video/video_frame_metadata.h"
+#include "api/frame_transformer_interface.h"
 #include "rtc_base/ref_count.h"
 #include "modules/rtp_rtcp/source/rtcp_packet/sender_report.h"
 
@@ -115,10 +116,32 @@ class FrameTransformerInterface : public rtc::RefCountInterface {
   ~FrameTransformerInterface() override = default;
 };
 
+class LTSenderReport {
+public:
+  // Arrival NTP timestamp for the last received RTCP SR.
+  NtpTime last_arrival_timestamp;
+  // Received (a.k.a., remote) NTP timestamp for the last received RTCP SR.
+  NtpTime last_remote_timestamp;
+  // Received (a.k.a., remote) RTP timestamp from the last received RTCP SR.
+  uint32_t last_remote_rtp_timestamp = 0;
+  // Total number of RTP data packets transmitted by the sender since starting
+  // transmission up until the time this SR packet was generated. The count
+  // should be reset if the sender changes its SSRC identifier.
+  uint32_t packets_sent = 0;
+  // Total number of payload octets (i.e., not including header or padding)
+  // transmitted in RTP data packets by the sender since starting transmission
+  // up until the time this SR packet was generated. The count should be reset
+  // if the sender changes its SSRC identifier.
+  uint64_t bytes_sent = 0;
+  // Total number of RTCP SR blocks received.
+  // https://www.w3.org/TR/webrtc-stats/#dom-rtcremoteoutboundrtpstreamstats-reportssent.
+  uint64_t reports_count = 0;
+};
+
 class SenderReportInterface : public rtc::RefCountInterface {
  public:
   virtual void OnSenderReport(
-      std::unique_ptr<rtcp::SenderReport> sender_report) = 0;
+      std::unique_ptr<LTSenderReport> sender_report) = 0;
 
  protected:
   ~SenderReportInterface() override = default;

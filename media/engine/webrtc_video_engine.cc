@@ -3444,11 +3444,11 @@ void WebRtcVideoChannel::WebRtcVideoReceiveStream::
 void WebRtcVideoChannel::WebRtcVideoReceiveStream::
     SetSenderReportCallback(
         rtc::scoped_refptr<webrtc::SenderReportInterface>
-            frame_transformer) {
+            sender_report_callback) {
   fprintf(stderr, "WebRtcVideoChannel::WebRtcVideoReceiveStream::SetSenderReportCallback\n");
-  // config_.frame_transformer = frame_transformer;
-  // if (stream_)
-  //   stream_->SetDepacketizerToDecoderFrameTransformer(frame_transformer);
+  config_.sender_report_callback = sender_report_callback;
+  if (stream_)
+    stream_->SetSenderReportCallback(sender_report_callback);
 }
 
 void WebRtcVideoChannel::WebRtcVideoReceiveStream::SetLocalSsrc(uint32_t ssrc) {
@@ -3749,6 +3749,26 @@ void WebRtcVideoChannel::SetDepacketizerToDecoderFrameTransformer(
   if (matching_stream != receive_streams_.end()) {
     matching_stream->second->SetDepacketizerToDecoderFrameTransformer(
         std::move(frame_transformer));
+  }
+}
+
+void WebRtcVideoChannel::SetSenderReportCallback(
+    uint32_t ssrc,
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {
+  fprintf(stderr, "WebRtcVideoChannel::SetSenderReportCallback\n");
+  RTC_DCHECK(sender_report_interface);
+  RTC_DCHECK_RUN_ON(&thread_checker_);
+  if (ssrc == 0) {
+    // If the receiver is unsignaled, save the frame transformer and set it
+    // when the stream is associated with an ssrc.
+    unsignaled_sender_report_interface_ = std::move(sender_report_interface);
+    return;
+  }
+
+  auto matching_stream = receive_streams_.find(ssrc);
+  if (matching_stream != receive_streams_.end()) {
+    matching_stream->second->SetSenderReportCallback(
+        std::move(sender_report_interface));
   }
 }
 

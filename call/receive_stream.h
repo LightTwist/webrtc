@@ -60,6 +60,10 @@ class MediaReceiveStreamInterface : public ReceiveStreamInterface {
   virtual void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<webrtc::FrameTransformerInterface>
           frame_transformer) = 0;
+          
+  virtual void SetSenderReportCallback(
+      rtc::scoped_refptr<webrtc::SenderReportInterface>
+          sender_report_callback) = 0;
 
   virtual void SetFrameDecryptor(
       rtc::scoped_refptr<webrtc::FrameDecryptorInterface> frame_decryptor) = 0;

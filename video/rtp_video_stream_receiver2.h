@@ -174,6 +174,8 @@ class RtpVideoStreamReceiver2 : public LossNotificationSender,
   // has previously been set. Does not reset the decoder state.
   void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<FrameTransformerInterface> frame_transformer);
+  void SetSenderReportCallback(
+      rtc::scoped_refptr<SenderReportInterface> sender_report_callback);
 
   // Called by VideoReceiveStreamInterface when stats are updated.
   void UpdateRtt(int64_t max_rtt_ms);
@@ -424,6 +426,9 @@ class RtpVideoStreamReceiver2 : public LossNotificationSender,
 
   rtc::scoped_refptr<RtpVideoStreamReceiverFrameTransformerDelegate>
       frame_transformer_delegate_;
+
+  rtc::scoped_refptr<SenderReportInterface>
+      sender_report_callback_;
 
   SeqNumUnwrapper<uint16_t> rtp_seq_num_unwrapper_
       RTC_GUARDED_BY(packet_sequence_checker_);

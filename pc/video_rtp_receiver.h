@@ -88,6 +88,9 @@ class VideoRtpReceiver : public RtpReceiverInternal,
 
   void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) override;
+  
+  void SetSenderReportCallback(
+      rtc::scoped_refptr<SenderReportInterface> sender_report_callback) override;
 
   void LTRequestKeyFrame() override;
 
@@ -178,6 +181,8 @@ class VideoRtpReceiver : public RtpReceiverInternal,
   rtc::scoped_refptr<DtlsTransportInterface> dtls_transport_
       RTC_GUARDED_BY(&signaling_thread_checker_);
   rtc::scoped_refptr<FrameTransformerInterface> frame_transformer_
+      RTC_GUARDED_BY(worker_thread_);
+  rtc::scoped_refptr<SenderReportInterface> sender_report_callback_
       RTC_GUARDED_BY(worker_thread_);
   // Stores the minimum jitter buffer delay. Handles caching cases
   // if `SetJitterBufferMinimumDelay` is called before start.

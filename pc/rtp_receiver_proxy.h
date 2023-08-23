@@ -47,6 +47,9 @@ PROXY_SECONDARY_CONSTMETHOD0(rtc::scoped_refptr<FrameDecryptorInterface>,
 PROXY_SECONDARY_METHOD1(void,
                         SetDepacketizerToDecoderFrameTransformer,
                         rtc::scoped_refptr<FrameTransformerInterface>)
+                        PROXY_SECONDARY_METHOD1(void,
+                        SetSenderReportCallback,
+                        rtc::scoped_refptr<SenderReportInterface>)
 PROXY_SECONDARY_METHOD0(void,
                         LTRequestKeyFrame)
 END_PROXY_MAP(RtpReceiver)

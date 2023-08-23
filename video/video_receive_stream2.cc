@@ -675,6 +675,13 @@ void VideoReceiveStream2::SetDepacketizerToDecoderFrameTransformer(
       std::move(frame_transformer));
 }
 
+void VideoReceiveStream2::SetSenderReportCallback(
+    rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
+  fprintf(stderr, "VideoReceiveStream2::SetSenderReportCallback\n");
+  rtp_video_stream_receiver_.SetSenderReportCallback(
+      std::move(sender_report_callback));
+}
+
 void VideoReceiveStream2::RequestKeyFrame(Timestamp now) {
   fprintf(stderr, "VideoReceiveStream2::RequestKeyFrame\n");
   //RTC_DCHECK_RUN_ON(&worker_sequence_checker_);

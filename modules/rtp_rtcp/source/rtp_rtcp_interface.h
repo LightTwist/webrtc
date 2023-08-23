@@ -39,6 +39,7 @@ class RtcEventLog;
 class RTPSender;
 class Transport;
 class VideoBitrateAllocationObserver;
+class FrameTransformerInterface;
 
 class RtpRtcpInterface : public RtcpFeedbackSenderInterface {
  public:

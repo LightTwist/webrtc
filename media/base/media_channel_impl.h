@@ -759,10 +759,10 @@ class VideoMediaReceiveChannel : public VideoMediaReceiveChannelInterface {
   }
   void SetSenderReportCallback(
       uint32_t ssrc,
-      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback)
       override {
       fprintf(stderr, "VoiceMediaReceiveChannel::SetSenderReportCallback\n");
-    // impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
+    impl()->SetSenderReportCallback(ssrc, sender_report_callback);
   }
   // Implementation on videoMediaReceiveChannelInterface
   bool SetRecvParameters(const VideoRecvParameters& params) override {

@@ -257,6 +257,7 @@ class VideoReceiveStreamInterface : public MediaReceiveStreamInterface {
     CryptoOptions crypto_options;
 
     rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer;
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback;
   };
 
   // TODO(pbos): Add info on currently-received codec to Stats.

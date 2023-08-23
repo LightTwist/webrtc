@@ -239,7 +239,7 @@ class WebRtcVideoChannel : public VideoMediaChannel,
 
   void SetSenderReportCallback(
       uint32_t ssrc,
-      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback)
       override;
 
   // Information queries to support SetReceiverFeedbackParameters
@@ -712,6 +712,9 @@ class WebRtcVideoChannel : public VideoMediaChannel,
   // Optional frame transformer set on unsignaled streams.
   rtc::scoped_refptr<webrtc::FrameTransformerInterface>
       unsignaled_frame_transformer_ RTC_GUARDED_BY(thread_checker_);
+
+  rtc::scoped_refptr<webrtc::SenderReportInterface>
+      unsignaled_sender_report_interface_ RTC_GUARDED_BY(thread_checker_);
 
   // TODO(bugs.webrtc.org/11341): Remove this and relevant PC API. Presence
   // of multiple negotiated codecs allows generic encoder fallback on failures.

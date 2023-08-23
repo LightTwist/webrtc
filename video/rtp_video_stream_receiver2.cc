@@ -979,6 +979,18 @@ void RtpVideoStreamReceiver2::SetDepacketizerToDecoderFrameTransformer(
   frame_transformer_delegate_->Init();
 }
 
+void RtpVideoStreamReceiver2::SetSenderReportCallback(
+    rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
+  fprintf(stderr, "RtpVideoStreamReceiver2::SetSenderReportCallback\n");
+
+  RTC_DCHECK_RUN_ON(&worker_task_checker_);
+  sender_report_callback_ = sender_report_callback;
+      // rtc::make_ref_counted<SenderReportInterface>(
+      //     this, std::move(sender_report_callback), rtc::Thread::Current(),
+      //     config_.rtp.remote_ssrc);
+  // frame_transformer_delegate_->Init();
+}
+
 void RtpVideoStreamReceiver2::UpdateRtt(int64_t max_rtt_ms) {
   RTC_DCHECK_RUN_ON(&packet_sequence_checker_);
   if (nack_module_)
@@ -1152,26 +1164,44 @@ bool RtpVideoStreamReceiver2::DeliverRtcp(const uint8_t* rtcp_packet,
                                           size_t rtcp_packet_length) {
   RTC_DCHECK_RUN_ON(&packet_sequence_checker_);
 
+  fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp\n");
+
   if (!receiving_) {
+    fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp - not receiving\n");
     return false;
   }
 
   rtp_rtcp_->IncomingRtcpPacket(
       rtc::MakeArrayView(rtcp_packet, rtcp_packet_length));
 
-  int64_t rtt = 0;
-  rtp_rtcp_->RTT(config_.rtp.remote_ssrc, &rtt, nullptr, nullptr, nullptr);
-  if (rtt == 0) {
-    // Waiting for valid rtt.
-    return true;
-  }
-
   absl::optional<RtpRtcpInterface::SenderReportStats> last_sr =
       rtp_rtcp_->GetSenderReportStats();
   if (!last_sr.has_value()) {
     // Waiting for RTCP.
+    fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp - last_sr is not defined\n");
     return true;
   }
+
+  fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp - checking sender_report_callback_\n");
+
+  if (sender_report_callback_ != nullptr) {
+    std::unique_ptr<LTSenderReport> sr = std::make_unique<LTSenderReport>();
+    fprintf(stderr, "calling callback\n");
+    sender_report_callback_->OnSenderReport(std::move(sr));
+  }
+  else {
+    fprintf(stderr, "sender_report_callback_ was null\n");
+  }
+
+  int64_t rtt = 0;
+  rtp_rtcp_->RTT(config_.rtp.remote_ssrc, &rtt, nullptr, nullptr, nullptr);
+
+  if (rtt == 0) {
+    // Waiting for valid rtt.
+    fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp - rtt is 0\n");
+    return true;
+  }
+
   int64_t time_since_received = clock_->CurrentNtpInMilliseconds() -
                                 last_sr->last_arrival_timestamp.ToMs();
   // Don't use old SRs to estimate time.

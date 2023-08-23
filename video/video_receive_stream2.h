@@ -169,6 +169,8 @@ class VideoReceiveStream2
       rtc::scoped_refptr<FrameDecryptorInterface> frame_decryptor) override;
   void SetDepacketizerToDecoderFrameTransformer(
       rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) override;
+  void SetSenderReportCallback(
+      rtc::scoped_refptr<SenderReportInterface> sender_report_callback) override;
 
   // Implements rtc::VideoSinkInterface<VideoFrame>.
   void OnFrame(const VideoFrame& video_frame) override;

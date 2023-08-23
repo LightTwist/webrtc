@@ -216,6 +216,14 @@ void AudioReceiveStreamImpl::SetDepacketizerToDecoderFrameTransformer(
       std::move(frame_transformer));
 }
 
+void AudioReceiveStreamImpl::SetSenderReportCallback(
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback) {
+  fprintf(stderr, "AudioReceiveStreamImpl::SetSenderReportCallback\n");
+  RTC_DCHECK_RUN_ON(&worker_thread_checker_);
+  channel_receive_->SetSenderReportCallback(
+      std::move(sender_report_callback));
+}
+
 void AudioReceiveStreamImpl::SetDecoderMap(
     std::map<int, SdpAudioFormat> decoder_map) {
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
