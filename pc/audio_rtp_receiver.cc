@@ -300,10 +300,9 @@ void AudioRtpReceiver::SetSenderReportCallback(
   fprintf(stderr, "AudioRtpReceiver::SetSenderReportCallback\n");
   RTC_DCHECK_RUN_ON(worker_thread_);
   if (media_channel_) {
-    // media_channel_->SetSenderReportCallback(
-    //     signaled_ssrc_.value_or(0), sender_report_interface);
+    media_channel_->SetSenderReportCallback(
+        signaled_ssrc_.value_or(0), sender_report_interface);
   }
-  // frame_transformer_ = std::move(frame_transformer);
 }
 
 void AudioRtpReceiver::Reconfigure(bool track_enabled) {

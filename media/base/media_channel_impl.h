@@ -149,6 +149,10 @@ class MediaChannel : public MediaSendChannelInterface,
       uint32_t ssrc,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override;
+  void SetSenderReportCallback(
+      uint32_t ssrc,
+      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+      override;
 
  protected:
   int SetOptionLocked(MediaChannelNetworkInterface::SocketType type,
@@ -514,6 +518,7 @@ class VoiceMediaReceiveChannel : public VoiceMediaReceiveChannelInterface {
       uint32_t ssrc,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override {
+    fprintf(stderr, "VoiceMediaReceiveChannel::SetDepacketizerToDecoderFrameTransformer\n");
     impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
   }
   void SetSenderReportCallback(
@@ -521,7 +526,7 @@ class VoiceMediaReceiveChannel : public VoiceMediaReceiveChannelInterface {
       rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
       override {
         fprintf(stderr, "VoiceMediaReceiveChannel::SetSenderReportCallback\n");
-    //impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
+    impl()->SetSenderReportCallback(ssrc, sender_report_interface);
   }
   // Implementation of VoiceMediaReceiveChannelInterface
   bool SetRecvParameters(const AudioRecvParameters& params) override {
@@ -755,6 +760,7 @@ class VideoMediaReceiveChannel : public VideoMediaReceiveChannelInterface {
       uint32_t ssrc,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override {
+    fprintf(stderr, "VoiceMediaReceiveChannel::SetDepacketizerToDecoderFrameTransformer\n");
     impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
   }
   void SetSenderReportCallback(

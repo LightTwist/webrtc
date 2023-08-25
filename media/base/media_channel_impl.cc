@@ -134,6 +134,10 @@ void MediaChannel::SetDepacketizerToDecoderFrameTransformer(
     uint32_t ssrc,
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) {}
 
+void MediaChannel::SetSenderReportCallback(
+    uint32_t ssrc,
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {}
+
 int MediaChannel::SetOptionLocked(MediaChannelNetworkInterface::SocketType type,
                                   rtc::Socket::Option opt,
                                   int option) {

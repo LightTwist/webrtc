@@ -939,6 +939,8 @@ void ChannelReceive::SetSenderReportCallback(
   fprintf(stderr, "ChannelReceive::SetSenderReportCallback\n");
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
 
+  rtp_rtcp_->SetSenderReportCallback(sender_report_callback);
+
   // if(sender_report_callback_ && sender_report_callback) {
   //   sender_report_callback_->Reset();
   // }
