@@ -97,7 +97,6 @@ AudioReceiveStreamImpl::AudioReceiveStreamImpl(
                                                   neteq_factory,
                                                   config,
                                                   event_log)) {
-    fprintf(stderr, "AudioReceiveStreamImpl::AudioReceiveStreamImpl\n");
                                                   }
 
 AudioReceiveStreamImpl::AudioReceiveStreamImpl(
