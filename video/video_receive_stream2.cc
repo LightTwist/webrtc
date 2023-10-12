@@ -830,7 +830,7 @@ void VideoReceiveStream2::OnDecodableFrameTimeout(TimeDelta wait) {
   //   RequestKeyFrame(now);
   // }
 
-  // buffer_->StartNextDecode(keyframe_required_);
+  buffer_->StartNextDecode(keyframe_required_);
 }
 
 VideoReceiveStream2::DecodeFrameResult
