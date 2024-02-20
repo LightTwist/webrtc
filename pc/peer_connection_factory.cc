@@ -50,12 +50,18 @@
 #include "rtc_base/numerics/safe_conversions.h"
 #include "rtc_base/rtc_certificate_generator.h"
 #include "rtc_base/system/file_wrapper.h"
+#include "rtc_base/uuid.h"
 
 namespace webrtc {
 
 rtc::scoped_refptr<PeerConnectionFactoryInterface>
 CreateModularPeerConnectionFactory(
     PeerConnectionFactoryDependencies dependencies) {
+  
+  fprintf(stderr, "===========================================================================\n");
+  fprintf(stderr, "LightTwist libwebrtc build %s\n", build_uuid);
+  fprintf(stderr, "===========================================================================\n");
+  
   // The PeerConnectionFactory must be created on the signaling thread.
   if (dependencies.signaling_thread &&
       !dependencies.signaling_thread->IsCurrent()) {

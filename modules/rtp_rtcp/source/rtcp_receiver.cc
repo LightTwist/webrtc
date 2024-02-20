@@ -166,16 +166,8 @@ RTCPReceiver::RTCPReceiver(const RtpRtcpInterface::Configuration& config,
       report_block_data_observer_(config.report_block_data_observer),
       packet_type_counter_observer_(config.rtcp_packet_type_counter_observer),
       num_skipped_packets_(0),
-      last_skipped_packets_warning_ms_(clock_->TimeInMilliseconds()) {
-
-        void *array[10];
-        size_t size;
-
-        // get void*'s for all entries on the stack
-        size = backtrace(array, 10);
-
-        // print out all the frames to stderr
-        backtrace_symbols_fd(array, size, STDERR_FILENO);
+      last_skipped_packets_warning_ms_(clock_->TimeInMilliseconds()) 
+{
   RTC_DCHECK(owner);
 }
 
