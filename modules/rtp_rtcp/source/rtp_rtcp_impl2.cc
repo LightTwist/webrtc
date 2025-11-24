@@ -498,7 +498,6 @@ ModuleRtpRtcpImpl2::GetSenderReportStats() const {
 
 void ModuleRtpRtcpImpl2::SetSenderReportCallback(rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
   //sender_report_callback_ = sender_report_callback;
-  fprintf(stderr, "ModuleRtpRtcpImpl2::SetSenderReportCallback\n");
   rtcp_receiver_.SetSenderReportCallback(sender_report_callback);
 }
 

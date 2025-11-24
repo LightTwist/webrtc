@@ -162,7 +162,6 @@ RtpVideoStreamReceiver2::RtcpFeedbackBuffer::RtcpFeedbackBuffer(
 }
 
 void RtpVideoStreamReceiver2::RtcpFeedbackBuffer::RequestKeyFrame() {
-  fprintf(stderr, "RtpVideoStreamReceiver2::RtcpFeedbackBuffer::::RequestKeyFrame\n");
   RTC_DCHECK_RUN_ON(&packet_sequence_checker_);
   request_key_frame_ = true;
 }
@@ -729,12 +728,7 @@ void RtpVideoStreamReceiver2::OnRtpPacket(const RtpPacketReceived& packet) {
   }
 }
 
-// void RtpVideoStreamReceiver2::LTRequestKeyFrame() {
-//   fprintf(stderr, "RtpVideoStreamReceiver2::LTRequestKeyFrame\n");
-// }
-
 void RtpVideoStreamReceiver2::RequestKeyFrame() {
-  fprintf(stderr, "RtpVideoStreamReceiver2::RequestKeyFrame\n");
   RTC_DCHECK_RUN_ON(&worker_task_checker_);
   // TODO(bugs.webrtc.org/10336): Allow the sender to ignore key frame requests
   // issued by anything other than the LossNotificationController if it (the
@@ -970,7 +964,6 @@ void RtpVideoStreamReceiver2::SetFrameDecryptor(
 
 void RtpVideoStreamReceiver2::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<FrameTransformerInterface> frame_transformer) {
-  fprintf(stderr, "RtpVideoStreamReceiver2::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(&worker_task_checker_);
   frame_transformer_delegate_ =
       rtc::make_ref_counted<RtpVideoStreamReceiverFrameTransformerDelegate>(
@@ -981,7 +974,6 @@ void RtpVideoStreamReceiver2::SetDepacketizerToDecoderFrameTransformer(
 
 void RtpVideoStreamReceiver2::SetSenderReportCallback(
     rtc::scoped_refptr<SenderReportInterface> sender_report_callback) {
-  fprintf(stderr, "RtpVideoStreamReceiver2::SetSenderReportCallback\n");
 
   // RTC_DCHECK_RUN_ON(&worker_task_checker_);
 
@@ -1166,8 +1158,6 @@ void RtpVideoStreamReceiver2::NotifyReceiverOfEmptyPacket(uint16_t seq_num) {
 bool RtpVideoStreamReceiver2::DeliverRtcp(const uint8_t* rtcp_packet,
                                           size_t rtcp_packet_length) {
   RTC_DCHECK_RUN_ON(&packet_sequence_checker_);
-
-  fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp\n");
 
   if (!receiving_) {
     fprintf(stderr, "RtpVideoStreamReceiver2::DeliverRtcp - not receiving\n");

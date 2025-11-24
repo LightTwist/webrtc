@@ -278,7 +278,6 @@ std::vector<RtpSource> AudioRtpReceiver::GetSources() const {
 }
 
 void AudioRtpReceiver::LTRequestKeyFrame() {
-  fprintf(stderr, "AudioRtpReceiver::LTRequestKeyFrame\n");
   // if (media_channel_) {
   //   media_channel_->RequestKeyFrame();
   // }
@@ -286,7 +285,6 @@ void AudioRtpReceiver::LTRequestKeyFrame() {
 
 void AudioRtpReceiver::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer) {
-  fprintf(stderr, "AudioRtpReceiver::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(worker_thread_);
   if (media_channel_) {
     media_channel_->SetDepacketizerToDecoderFrameTransformer(
@@ -297,7 +295,6 @@ void AudioRtpReceiver::SetDepacketizerToDecoderFrameTransformer(
 
 void AudioRtpReceiver::SetSenderReportCallback(
     rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {
-  fprintf(stderr, "AudioRtpReceiver::SetSenderReportCallback\n");
   RTC_DCHECK_RUN_ON(worker_thread_);
   if (media_channel_) {
     media_channel_->SetSenderReportCallback(

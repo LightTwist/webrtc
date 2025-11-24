@@ -518,14 +518,12 @@ class VoiceMediaReceiveChannel : public VoiceMediaReceiveChannelInterface {
       uint32_t ssrc,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override {
-    fprintf(stderr, "VoiceMediaReceiveChannel::SetDepacketizerToDecoderFrameTransformer\n");
     impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
   }
   void SetSenderReportCallback(
-      uint32_t ssrc,
-      rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
-      override {
-        fprintf(stderr, "VoiceMediaReceiveChannel::SetSenderReportCallback\n");
+    uint32_t ssrc,
+    rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface)
+    override {
     impl()->SetSenderReportCallback(ssrc, sender_report_interface);
   }
   // Implementation of VoiceMediaReceiveChannelInterface
@@ -760,14 +758,12 @@ class VideoMediaReceiveChannel : public VideoMediaReceiveChannelInterface {
       uint32_t ssrc,
       rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer)
       override {
-    fprintf(stderr, "VoiceMediaReceiveChannel::SetDepacketizerToDecoderFrameTransformer\n");
     impl()->SetDepacketizerToDecoderFrameTransformer(ssrc, frame_transformer);
   }
   void SetSenderReportCallback(
       uint32_t ssrc,
       rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback)
       override {
-      fprintf(stderr, "VoiceMediaReceiveChannel::SetSenderReportCallback\n");
     impl()->SetSenderReportCallback(ssrc, sender_report_callback);
   }
   // Implementation on videoMediaReceiveChannelInterface

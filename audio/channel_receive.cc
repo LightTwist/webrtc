@@ -567,7 +567,6 @@ ChannelReceive::ChannelReceive(
       crypto_options_(crypto_options),
       absolute_capture_time_interpolator_(clock) {
 
-  fprintf(stderr, "ChannelReceive::ChannelReceive\n");
   RTC_DCHECK(audio_device_module);
 
   network_thread_checker_.Detach();
@@ -735,7 +734,6 @@ void ChannelReceive::ReceivePacket(const uint8_t* packet,
 }
 
 void ChannelReceive::ReceivedRTCPPacket(const uint8_t* data, size_t length) {
-  fprintf(stderr, "ChannelReceive::ReceivedRTCPPacket\n");
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
   // TODO(bugs.webrtc.org/11993): Expect to be called exclusively on the
   // network thread.
@@ -924,7 +922,6 @@ void ChannelReceive::SetAssociatedSendChannel(
 
 void ChannelReceive::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer) {
-  fprintf(stderr, "ChannelReceive::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
 
   if(frame_transformer_delegate_ && frame_transformer) {
@@ -936,7 +933,6 @@ void ChannelReceive::SetDepacketizerToDecoderFrameTransformer(
 
 void ChannelReceive::SetSenderReportCallback(
     rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback) {
-  fprintf(stderr, "ChannelReceive::SetSenderReportCallback\n");
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
 
   rtp_rtcp_->SetSenderReportCallback(sender_report_callback);

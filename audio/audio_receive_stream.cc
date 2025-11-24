@@ -64,8 +64,6 @@ std::unique_ptr<voe::ChannelReceiveInterface> CreateChannelReceive(
     const webrtc::AudioReceiveStreamInterface::Config& config,
     RtcEventLog* event_log) {
 
-  fprintf(stderr, "CreateChannelReceive\n");
-
   RTC_DCHECK(audio_state);
   internal::AudioState* internal_audio_state =
       static_cast<internal::AudioState*>(audio_state);
@@ -209,7 +207,6 @@ bool AudioReceiveStreamImpl::IsRunning() const {
 
 void AudioReceiveStreamImpl::SetDepacketizerToDecoderFrameTransformer(
     rtc::scoped_refptr<webrtc::FrameTransformerInterface> frame_transformer) {
-  fprintf(stderr, "AudioReceiveStreamImpl::SetDepacketizerToDecoderFrameTransformer\n");
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
   channel_receive_->SetDepacketizerToDecoderFrameTransformer(
       std::move(frame_transformer));
@@ -217,7 +214,6 @@ void AudioReceiveStreamImpl::SetDepacketizerToDecoderFrameTransformer(
 
 void AudioReceiveStreamImpl::SetSenderReportCallback(
     rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_callback) {
-  fprintf(stderr, "AudioReceiveStreamImpl::SetSenderReportCallback\n");
   RTC_DCHECK_RUN_ON(&worker_thread_checker_);
   channel_receive_->SetSenderReportCallback(
       std::move(sender_report_callback));

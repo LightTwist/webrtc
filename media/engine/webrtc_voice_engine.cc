@@ -1242,7 +1242,6 @@ class WebRtcVoiceMediaChannel::WebRtcAudioReceiveStream {
   void SetSenderReportCallback(
       rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {
     RTC_DCHECK_RUN_ON(&worker_thread_checker_);
-    fprintf(stderr, "WebRtcAudioReceiveStream::SetSenderReportCallback\n");
     stream_->SetSenderReportCallback(sender_report_interface);
   }
 
@@ -2583,7 +2582,6 @@ void WebRtcVoiceMediaChannel::SetSenderReportCallback(
     uint32_t ssrc,
     rtc::scoped_refptr<webrtc::SenderReportInterface> sender_report_interface) {
   RTC_DCHECK_RUN_ON(worker_thread_);
-  fprintf(stderr, "WebRtcVoiceMediaChannel::SetSenderReportCallback\n");
   // if (ssrc == 0) {
   //   // If the receiver is unsignaled, save the frame transformer and set it when
   //   // the stream is associated with an ssrc.
